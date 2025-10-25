@@ -1,0 +1,39 @@
+body {
+  margin: 0;
+  padding: 20px;
+  box-sizing: border-box;
+  font-family: sans-serif;
+  width: 300px;
+  height: 300px;
+  border: 3px solid lightblue;
+  border-style: ridge;
+  background: #1e1e1e;
+  color: #c9c8c7;
+
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+header {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  /* align-items: flex-start; */
+}
+
+.logo-name-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 16px;
+}
+
+/* Icons */
+.cat-icon {
+  width: 55px;
+}
+
+.exit-icon {
+  width: 15px;
+}
