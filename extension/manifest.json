@@ -3,12 +3,23 @@
   "name": "Co2oounter",
   "version": "1.0",
   "description": "Count how mnay prompts you are making",
-  "permissions": ["storage", "webRequest", "webRequestBlocking"],
+  "permissions": ["storage", "webRequest", "webRequestBlocking", "scripting"],
   "host_permissions": [
     "https://chat.openai.com/*",
     "https://chatgpt.com/*",
     "https://claude.ai/*",
-    "https://gemini.google.com/*"
+    "https://gemini.google.com/*",
+    "https://our-frontend-domain.com/*",
+    "http://localhost:3000/*"
+  ],
+  "content_scripts": [
+    {
+      "matches": [
+        "https://our-frontend-domain.com/*",
+        "http://localhost:3000/*"
+      ],
+      "js": ["content.js"]
+    }
   ],
   "background": {
     "service_worker": "background.js"
