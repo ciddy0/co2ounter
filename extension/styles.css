@@ -1,12 +1,32 @@
 body {
+  box-sizing: border-box;
   font-family: sans-serif;
   padding: 10px;
-  width: 150px;
+  width: 180px;
+  height: auto;
+  border: 3px solid lightblue;
+  border-style: ridge;
+  /* background-image: linear-gradient(rgb(186, 212, 222), rgb(171, 147, 183)); */
+  background: #1e1e1e;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
 }
 
-h1 {
+.greeting {
   font-size: 16px;
   margin-bottom: 5px;
+  text-align: center;
+  color: #c9c8c7;
+}
+
+.extension-name {
+  font-size: 25px;
+  font-weight: bold;
+  color: #f2f0ef;
 }
 
 #count {
@@ -17,4 +37,26 @@ h1 {
 .content-container {
   display: flex;
   flex-direction: column;
+  align-items: center;
+  gap: 18px;
+}
+
+.buttons-container {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.entry-button {
+  height: 20px;
+  border: none;
+  border-radius: 5px;
+  background: #f2f0ef;
+}
+
+.cat-icon {
+  width: 100px;
+  display: block;
+  margin: 0 auto;
 }
