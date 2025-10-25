@@ -1,12 +1,11 @@
 body {
+  margin: 0;
+  padding: 20px;
   box-sizing: border-box;
   font-family: sans-serif;
-  padding: 10px;
-  width: 180px;
-  height: 300px;
+  width: 300px;
+  height: auto;
   border: 3px solid lightblue;
-  border-style: ridge;
-  /* background-image: linear-gradient(rgb(186, 212, 222), rgb(171, 147, 183)); */
   background: #1e1e1e;
 
   display: flex;
@@ -17,8 +16,8 @@ body {
 }
 
 .greeting {
+  width: 50%;
   font-size: 16px;
-  margin-bottom: 5px;
   text-align: center;
   color: #c9c8c7;
 }
@@ -55,8 +54,15 @@ body {
   background: #f2f0ef;
 }
 
+/* Icon */
 .cat-icon {
-  width: 100px;
+  width: 130px;
   display: block;
   margin: 0 auto;
+}
+
+/* This will be moved to content-popup css */
+.stats-section {
+  width: 100%;
+  color: white;
 }
