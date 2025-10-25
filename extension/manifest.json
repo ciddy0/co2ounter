@@ -14,7 +14,7 @@
     "service_worker": "background.js"
   },
   "action": {
-    "default_popup": "content-popup.html",
+    "default_popup": "welcome-popup.html",
     "default_icon": "leaf.png"
   }
 }
