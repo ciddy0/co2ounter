@@ -3,22 +3,47 @@
 let promptCount = 0;
 let totalInputTokens = 0;
 let totalOutputTokens = 0;
+let totalCO2 = 0; // in grams
 
+// carbon constants
+const MODEL_PARAMS = {
+  "gpt-5": 500, // estimated active params (billions)
+  "gpt-4o": 500,
+  "gpt-4": 1200,
+  "gpt-3.5": 175,
+  "claude-3-opus": 500,
+  "claude-3-sonnet": 200,
+  "claude-3-haiku": 30,
+};
+const PUE = 1.2;
+const CARBON_INTENSITY = 0.379; // kg CO2 / kWh
+const ENERGY_PER_TOKEN = 7.594e-9; // kWh per token per billion params
+
+function calculateCarbon(model, outputTokens) {
+  const paramsB = MODEL_PARAMS[model] || 500;
+  const energyKWh = ENERGY_PER_TOKEN * paramsB * outputTokens * PUE;
+  const carbonKg = energyKWh * CARBON_INTENSITY;
+  const carbonG = carbonKg * 1000; // convert to grams
+  return carbonG;
+}
 chrome.storage.local.get(
   {
     promptCount: 0,
     totalInputTokens: 0,
     totalOutputTokens: 0,
+    totalCO2: 0,
   },
   (data) => {
     promptCount = data.promptCount || 0;
     totalInputTokens = data.totalInputTokens || 0;
     totalOutputTokens = data.totalOutputTokens || 0;
+    totalCO2 = data.totalCO2 || 0;
     updateBadge(promptCount);
     console.log("📊 Loaded stats:", {
       promptCount,
       totalInputTokens,
       totalOutputTokens,
+      totalCO2,
     });
   }
 );
@@ -47,11 +72,13 @@ function saveStats() {
     promptCount,
     totalInputTokens,
     totalOutputTokens,
+    totalCO2,
   });
   console.log("💾 Saved stats:", {
     promptCount,
     totalInputTokens,
     totalOutputTokens,
+    totalCO2,
   });
 }
 
@@ -64,6 +91,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       promptCount,
       totalInputTokens,
       totalOutputTokens,
+      totalCO2,
     };
     console.log("📤 Sending stats:", stats);
     sendResponse(stats);
@@ -72,6 +100,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     promptCount = 0;
     totalInputTokens = 0;
     totalOutputTokens = 0;
+    totalCO2 = 0;
     updateBadge(0);
     saveStats();
     sendResponse({ success: true });
@@ -97,14 +126,22 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     return true;
   } else if (message.type === "RESPONSE_TOKENS") {
     totalOutputTokens += message.tokens;
-    saveStats();
 
-    console.log(`📊 Output tokens: ${message.tokens}`);
+    // calculate carbon
+    const emission = calculateCarbon(message.model, message.tokens); // <— this is where it's called
+    totalCO2 += emission;
+    console.log(
+      `📊 Output tokens: ${message.tokens} | Model: ${
+        message.model
+      } | Emission: ${emission.toFixed(4)}g CO₂`
+    );
+    saveStats();
 
     notifyPopup({
       promptCount,
       totalInputTokens,
       totalOutputTokens,
+      totalCO2,
     });
 
     sendResponse({ success: true });

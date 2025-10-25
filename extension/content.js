@@ -48,6 +48,7 @@ window.addEventListener("message", (event) => {
     messageQueue.push({
       type: "RESPONSE_TOKENS",
       tokens: event.data.tokens,
+      model: event.data.model,
       text: event.data.text,
     });
     processQueue();
