@@ -23,13 +23,16 @@ export default function LoginPage() {
     e.preventDefault();
     try {
       const cred = await signInWithEmailAndPassword(auth, email, password);
-      const idToken = await cred.user.getIdToken();
-      // Redirect to a special page that posts the token for the extension
-      // Use URL fragment so it won't be sent to backend in server logs
-      router.push(`/auth/redirect#token=${idToken}`);
+      const idToken = await cred.user.getIdToken(); // firebase ID token (JWT)
+      // store in localStorage for website usage
+      localStorage.setItem("idToken", idToken);
+
+      // Redirect to auth/redirect page with token in fragment
+      // Using fragment (#) avoids server logs containing the token
+      router.push(`/auth/redirect#token=${encodeURIComponent(idToken)}`);
     } catch (err) {
       console.error("login error", err);
-      alert("Login failed: " + err.message);
+      alert("Login failed: " + (err.message || err));
     }
   }
 
