@@ -1,5 +1,3 @@
-// background.js
-
 // Global State
 let firebaseToken = null;
 let promptCount = 0;
@@ -28,7 +26,44 @@ function calculateCarbon(model, tokens) {
   return carbonKg * 1000; // grams
 }
 
-// Load state from storage
+// Increment stats + update badge + notify popup
+function incrementStats({ inputTokens = 0, outputTokens = 0, co2 = 0 }) {
+  if (inputTokens) {
+    promptCount++;
+    totalInputTokens += inputTokens;
+  }
+  if (outputTokens) {
+    totalOutputTokens += outputTokens;
+  }
+  if (co2) {
+    totalCO2 += co2;
+  }
+
+  // Save to local storage
+  chrome.storage.local.set(
+    { promptCount, totalInputTokens, totalOutputTokens, totalCO2 },
+    () => {
+      console.log("💾 Stats saved", {
+        promptCount,
+        totalInputTokens,
+        totalOutputTokens,
+        totalCO2,
+      });
+    }
+  );
+
+  // Update badge
+  chrome.action.setBadgeText({ text: promptCount.toString() });
+  chrome.action.setBadgeBackgroundColor({ color: "#4caf50" });
+
+  // Notify popup
+  chrome.runtime.sendMessage({
+    type: "STATS_UPDATED",
+    stats: { promptCount, totalInputTokens, totalOutputTokens, totalCO2 },
+  });
+}
+
+// Load Firebase token and local stats on startup
 chrome.storage.sync.get({ firebaseToken: null }, (data) => {
   firebaseToken = data.firebaseToken;
   console.log("🔑 Loaded Firebase token:", firebaseToken ? "YES" : "NO");
@@ -37,11 +72,11 @@ chrome.storage.sync.get({ firebaseToken: null }, (data) => {
 chrome.storage.local.get(
   { promptCount: 0, totalInputTokens: 0, totalOutputTokens: 0, totalCO2: 0 },
   (data) => {
-    promptCount = data.promptCount || 0;
-    totalInputTokens = data.totalInputTokens || 0;
-    totalOutputTokens = data.totalOutputTokens || 0;
-    totalCO2 = data.totalCO2 || 0;
-    updateBadge(promptCount);
+    promptCount = data.promptCount;
+    totalInputTokens = data.totalInputTokens;
+    totalOutputTokens = data.totalOutputTokens;
+    totalCO2 = data.totalCO2;
+    chrome.action.setBadgeText({ text: promptCount.toString() });
     console.log("📊 Loaded stats:", {
       promptCount,
       totalInputTokens,
@@ -51,41 +86,12 @@ chrome.storage.local.get(
   }
 );
 
-// Helpers
-function updateBadge(count) {
-  chrome.action.setBadgeText({ text: count.toString() });
-  chrome.action.setBadgeBackgroundColor({ color: "#4caf50" });
-}
-
-function saveStats() {
-  chrome.storage.local.set({
-    promptCount,
-    totalInputTokens,
-    totalOutputTokens,
-    totalCO2,
-  });
-  chrome.runtime.sendMessage({
-    type: "STATS_UPDATED",
-    promptCount,
-    totalInputTokens,
-    totalOutputTokens,
-    totalCO2,
-  });
-  console.log("💾 Saved stats:", {
-    promptCount,
-    totalInputTokens,
-    totalOutputTokens,
-    totalCO2,
-  });
-}
-
 // Backend sync helper
 async function syncWithBackend(endpoint, body) {
   if (!firebaseToken) {
     console.warn("⚠️ No Firebase token, skipping backend sync");
     return;
   }
-
   try {
     const res = await fetch("http://localhost:4000" + endpoint, {
       method: "POST",
@@ -103,37 +109,42 @@ async function syncWithBackend(endpoint, body) {
   }
 }
 
-// Notify popup (if open)
-function notifyPopup() {
-  chrome.runtime.sendMessage(
-    {
-      type: "STATS_UPDATED",
-      promptCount,
-      totalInputTokens,
-      totalOutputTokens,
-      totalCO2,
-    },
-    () => {
-      if (chrome.runtime.lastError) return;
-    }
-  );
-}
-
-// Message Handler
+// Main message handler
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   console.log("📨 Received message:", message.type, message);
 
-  // Store Firebase token
   if (message.type === "STORE_TOKEN" && message.token) {
     firebaseToken = message.token;
     chrome.storage.sync.set({ firebaseToken }, () => {
       console.log("✅ Stored Firebase token in chrome.storage");
       sendResponse({ success: true });
     });
-    return true; // keep async
+    return true; // async sendResponse
   }
 
-  // Get stats
+  if (message.type === "PROMPT_SENT") {
+    incrementStats({ inputTokens: message.inputTokens });
+    syncWithBackend("/api/prompt", {
+      model: message.model || "chatgpt",
+      inputTokens: message.inputTokens,
+      co2: message.co2 || 0,
+    });
+    sendResponse({ received: true });
+    return true;
+  }
+
+  if (message.type === "RESPONSE_TOKENS") {
+    const co2 = calculateCarbon(message.model, message.tokens);
+    incrementStats({ outputTokens: message.tokens, co2 });
+    syncWithBackend("/api/response", {
+      model: message.model || "chatgpt",
+      outputTokens: message.tokens,
+      co2,
+    });
+    sendResponse({ received: true });
+    return true;
+  }
+
   if (message.type === "GET_STATS") {
     sendResponse({
       promptCount,
@@ -144,59 +155,10 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     return true;
   }
 
-  // Reset stats
   if (message.type === "RESET_STATS") {
-    promptCount = 0;
-    totalInputTokens = 0;
-    totalOutputTokens = 0;
-    totalCO2 = 0;
-    updateBadge(0);
-    saveStats();
+    promptCount = totalInputTokens = totalOutputTokens = totalCO2 = 0;
+    incrementStats({}); // triggers badge + storage + popup
     sendResponse({ success: true });
-    return true;
-  }
-
-  // Prompt sent
-  if (message.type === "PROMPT_SENT") {
-    promptCount++;
-    totalInputTokens += message.inputTokens || 0;
-    updateBadge(promptCount);
-    saveStats();
-
-    // Backend
-    syncWithBackend("/api/prompt", {
-      model: message.model || "chatgpt",
-      inputTokens: message.inputTokens,
-      co2: message.co2 || 0,
-    });
-
-    sendResponse({ received: true });
-    return true;
-  }
-
-  // Response tokens
-  if (message.type === "RESPONSE_TOKENS") {
-    totalOutputTokens += message.tokens || 0;
-
-    // CO2 calculation
-    let emission = 0;
-    try {
-      emission = calculateCarbon(message.model, message.tokens);
-      totalCO2 += emission;
-    } catch (e) {
-      console.error("❌ Carbon calculation failed", e);
-    }
-
-    saveStats();
-
-    // Backend
-    syncWithBackend("/api/response", {
-      model: message.model || "chatgpt",
-      outputTokens: message.tokens,
-      co2: emission,
-    });
-
-    sendResponse({ received: true });
     return true;
   }
 

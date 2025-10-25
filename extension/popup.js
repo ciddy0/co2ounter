@@ -1,56 +1,36 @@
 // popup.js
-document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener("DOMContentLoaded", () => {
   const countEl = document.getElementById("count");
-  const inputTokensEl = document.getElementById("inputTokens");
-  const outputTokensEl = document.getElementById("outputTokens");
-  const totalTokensEl = document.getElementById("totalTokens");
+  const inputEl = document.getElementById("inputTokens");
+  const outputEl = document.getElementById("outputTokens");
+  const totalEl = document.getElementById("totalTokens");
   const co2El = document.getElementById("co2");
 
   function updateStats(stats) {
     if (countEl) countEl.innerText = (stats.promptCount || 0).toLocaleString();
-    if (inputTokensEl)
-      inputTokensEl.innerText = (stats.totalInputTokens || 0).toLocaleString();
-    if (outputTokensEl)
-      outputTokensEl.innerText = (
-        stats.totalOutputTokens || 0
+    if (inputEl)
+      inputEl.innerText = (stats.totalInputTokens || 0).toLocaleString();
+    if (outputEl)
+      outputEl.innerText = (stats.totalOutputTokens || 0).toLocaleString();
+    if (totalEl)
+      totalEl.innerText = (
+        (stats.totalInputTokens || 0) + (stats.totalOutputTokens || 0)
       ).toLocaleString();
-    if (totalTokensEl) {
-      const total =
-        (stats.totalInputTokens || 0) + (stats.totalOutputTokens || 0);
-      totalTokensEl.innerText = total.toLocaleString();
-    }
-    if (co2El) {
-      const grams = stats.totalCO2 || 0;
-      co2El.innerText =
-        grams < 1 ? `${(grams * 1000).toFixed(2)} mg` : `${grams.toFixed(3)} g`;
-    }
+    if (co2El) co2El.innerText = (stats.totalCO2 || 0).toFixed(2) + " g";
   }
 
-  // Fetch stats once when popup opens
-  chrome.runtime.sendMessage({ type: "GET_STATS" }, (response) => {
-    if (response) updateStats(response);
-  });
+  // Initial read
+  chrome.storage.local.get(
+    ["promptCount", "totalInputTokens", "totalOutputTokens", "totalCO2"],
+    (data) => {
+      updateStats(data);
+    }
+  );
 
-  // Listen for live updates from background
+  // Live updates
   chrome.runtime.onMessage.addListener((message) => {
-    if (message.type === "STATS_UPDATED" && message.stats) {
+    if (message.type === "STATS_UPDATED") {
       updateStats(message.stats);
     }
   });
-
-  // Reset Button
-  const resetButton = document.getElementById("resetButton");
-  if (resetButton) {
-    resetButton.addEventListener("click", () => {
-      chrome.runtime.sendMessage({ type: "RESET_STATS" }, (response) => {
-        if (response && response.success) {
-          updateStats({
-            promptCount: 0,
-            totalInputTokens: 0,
-            totalOutputTokens: 0,
-          });
-        }
-      });
-    });
-  }
 });
