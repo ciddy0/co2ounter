@@ -36,13 +36,16 @@ header,
   display: flex;
   flex-direction: column;
   align-items: center;
+  gap: 24px;
+}
+
+.prompt-content-container:not(.prompt-message) {
   gap: 16px;
-  margin: 16px;
 }
 
 .stats-container {
   display: flex;
-  gap: 32px;
+  gap: 40px;
 }
 
 .bottom-content-container {
@@ -77,12 +80,19 @@ header,
   color: #b3b3b3;
 }
 
+.grams-text {
+  font-size: 1rem;
+}
+
 /* Icons */
 .header-icon {
   width: 20%;
 }
 
-.exit-icon,
+.exit-icon {
+  width: 12%;
+}
+
 .bell-icon {
   width: 10%;
 }
