@@ -1,5 +1,4 @@
 // popup.js
-// Wait for DOM to be ready
 document.addEventListener("DOMContentLoaded", function () {
   const countEl = document.getElementById("count");
   const inputTokensEl = document.getElementById("inputTokens");
@@ -7,46 +6,33 @@ document.addEventListener("DOMContentLoaded", function () {
   const totalTokensEl = document.getElementById("totalTokens");
 
   function updateStats(stats) {
-    if (countEl) {
-      countEl.innerText = (stats.promptCount || 0).toLocaleString();
-    }
-
-    if (inputTokensEl) {
+    if (countEl) countEl.innerText = (stats.promptCount || 0).toLocaleString();
+    if (inputTokensEl)
       inputTokensEl.innerText = (stats.totalInputTokens || 0).toLocaleString();
-    }
-
-    if (outputTokensEl) {
+    if (outputTokensEl)
       outputTokensEl.innerText = (
         stats.totalOutputTokens || 0
       ).toLocaleString();
-    }
-
     if (totalTokensEl) {
-      const totalTokens =
+      const total =
         (stats.totalInputTokens || 0) + (stats.totalOutputTokens || 0);
-      totalTokensEl.innerText = totalTokens.toLocaleString();
+      totalTokensEl.innerText = total.toLocaleString();
     }
   }
 
-  // Ask background for current stats when popup opens
+  // Fetch stats once when popup opens
   chrome.runtime.sendMessage({ type: "GET_STATS" }, (response) => {
-    if (response) {
-      updateStats(response);
-    }
+    if (response) updateStats(response);
   });
 
-  // Listen for live updates
+  // Listen for live updates from background
   chrome.runtime.onMessage.addListener((message) => {
-    if (message.type === "STATS_UPDATED") {
-      updateStats({
-        promptCount: message.promptCount,
-        totalInputTokens: message.totalInputTokens,
-        totalOutputTokens: message.totalOutputTokens,
-      });
+    if (message.type === "STATS_UPDATED" && message.stats) {
+      updateStats(message.stats);
     }
   });
 
-  // Optional: Add reset button handler if you have one
+  // Reset Button
   const resetButton = document.getElementById("resetButton");
   if (resetButton) {
     resetButton.addEventListener("click", () => {
