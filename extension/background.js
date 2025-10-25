@@ -1,60 +1,115 @@
 // background.js
-// Initialize prompt count from storage
+// Initialize counts from storage
 let promptCount = 0;
-chrome.storage.local.get({ promptCount: 0 }, (data) => {
-  promptCount = data.promptCount || 0;
-  updateBadge(promptCount);
-});
+let totalInputTokens = 0;
+let totalOutputTokens = 0;
 
-// Function to update badge
+chrome.storage.local.get(
+  {
+    promptCount: 0,
+    totalInputTokens: 0,
+    totalOutputTokens: 0,
+  },
+  (data) => {
+    promptCount = data.promptCount || 0;
+    totalInputTokens = data.totalInputTokens || 0;
+    totalOutputTokens = data.totalOutputTokens || 0;
+    updateBadge(promptCount);
+    console.log("📊 Loaded stats:", {
+      promptCount,
+      totalInputTokens,
+      totalOutputTokens,
+    });
+  }
+);
+
 function updateBadge(count) {
   chrome.action.setBadgeText({ text: count.toString() });
   chrome.action.setBadgeBackgroundColor({ color: "#4caf50" });
 }
 
-// Function to notify popup safely (only if it's open)
-function notifyPopup(count) {
-  chrome.runtime.sendMessage({ type: "PROMPT_COUNT_UPDATED", count }, () => {
-    if (chrome.runtime.lastError) {
-      // Popup not open, this is expected and fine
+function notifyPopup(data) {
+  chrome.runtime.sendMessage(
+    {
+      type: "STATS_UPDATED",
+      ...data,
+    },
+    () => {
+      if (chrome.runtime.lastError) {
+        // Popup not open, this is expected
+      }
     }
+  );
+}
+
+function saveStats() {
+  chrome.storage.local.set({
+    promptCount,
+    totalInputTokens,
+    totalOutputTokens,
+  });
+  console.log("💾 Saved stats:", {
+    promptCount,
+    totalInputTokens,
+    totalOutputTokens,
   });
 }
 
-// Handle messages
+// CONSOLIDATED message handler - handles ALL message types
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  if (message.type === "PROMPT_SENT") {
-    promptCount++;
-    updateBadge(promptCount);
-    chrome.storage.local.set({ promptCount });
-    notifyPopup(promptCount);
+  console.log("📨 Received message:", message.type, message);
+
+  if (message.type === "GET_STATS") {
+    const stats = {
+      promptCount,
+      totalInputTokens,
+      totalOutputTokens,
+    };
+    console.log("📤 Sending stats:", stats);
+    sendResponse(stats);
+    return true;
+  } else if (message.type === "RESET_STATS") {
+    promptCount = 0;
+    totalInputTokens = 0;
+    totalOutputTokens = 0;
+    updateBadge(0);
+    saveStats();
     sendResponse({ success: true });
-  } else if (message.type === "GET_PROMPT_COUNT") {
-    sendResponse({ count: promptCount });
+    return true;
+  } else if (message.type === "PROMPT_SENT") {
+    // Received from content script when user sends a prompt
+    promptCount++;
+    totalInputTokens += message.inputTokens || 0;
+    updateBadge(promptCount);
+    saveStats();
+
+    console.log(
+      `📊 Input tokens: ${message.inputTokens}, Total prompts: ${promptCount}`
+    );
+
+    notifyPopup({
+      promptCount,
+      totalInputTokens,
+      totalOutputTokens,
+    });
+
+    sendResponse({ success: true });
+    return true;
+  } else if (message.type === "RESPONSE_TOKENS") {
+    totalOutputTokens += message.tokens;
+    saveStats();
+
+    console.log(`📊 Output tokens: ${message.tokens}`);
+
+    notifyPopup({
+      promptCount,
+      totalInputTokens,
+      totalOutputTokens,
+    });
+
+    sendResponse({ success: true });
+    return true;
   }
+
   return true;
 });
-
-// Try multiple URL patterns to catch ChatGPT requests
-chrome.webRequest.onBeforeRequest.addListener(
-  (details) => {
-    console.log("🔍 Request detected:", details.url, details.method);
-    if (details.method === "POST") {
-      promptCount++;
-      updateBadge(promptCount);
-      chrome.storage.local.set({ promptCount });
-      notifyPopup(promptCount);
-    }
-  },
-  {
-    urls: [
-      // ChatGPT
-      "https://chatgpt.com/backend-api/conversation",
-      "https://chatgpt.com/backend-api/*/conversation",
-      "https://chat.openai.com/backend-api/conversation",
-      "https://chat.openai.com/backend-api/*/conversation",
-      // Claude
-      "https://claude.ai/api/organizations/*/chat_conversations/*/completion",
-    ],
-  }
-);
