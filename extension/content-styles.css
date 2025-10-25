@@ -1,21 +1,24 @@
 body {
   margin: 0;
-  padding: 20px;
+  padding: 18px;
   box-sizing: border-box;
   font-family: sans-serif;
   width: 300px;
-  height: 300px;
+  height: auto;
   border: 3px solid lightblue;
   border-style: ridge;
   background: #1e1e1e;
-  color: #c9c8c7;
+  color: #f2f0ef;
+  font-size: 1rem;
 
   display: flex;
   flex-direction: column;
   gap: 16px;
 }
 
-header {
+/* Containers */
+header,
+.limit-container {
   width: 100%;
   display: flex;
   justify-content: space-between;
@@ -26,14 +29,64 @@ header {
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 16px;
+}
+
+.prompt-content-container {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  margin: 16px;
+}
+
+.stats-container {
+  display: flex;
+  gap: 32px;
+}
+
+.bottom-content-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Others */
+.stats-name {
+  color: #b3b3b3;
+}
+
+.stats-data {
+  font-size: 3.75rem;
+}
+
+.prompt-message {
+  font-size: 1.25rem;
+  margin-bottom: 16px;
+}
+
+.dashboard-button {
+  width: 100%;
+  height: 35px;
+  border-radius: 5px;
+}
+
+.details-text {
+  font-size: 0.75rem;
+  color: #b3b3b3;
 }
 
 /* Icons */
-.cat-icon {
-  width: 55px;
+.header-icon {
+  width: 20%;
 }
 
-.exit-icon {
-  width: 15px;
+.exit-icon,
+.bell-icon {
+  width: 10%;
+}
+
+.cat-icon {
+  width: 80%;
 }
