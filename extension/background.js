@@ -1,22 +1,22 @@
 // background.js
-// Initalize prompt count from storage
+// Initialize prompt count from storage
 let promptCount = 0;
 chrome.storage.local.get({ promptCount: 0 }, (data) => {
   promptCount = data.promptCount || 0;
   updateBadge(promptCount);
 });
 
-// function to update badge
+// Function to update badge
 function updateBadge(count) {
   chrome.action.setBadgeText({ text: count.toString() });
   chrome.action.setBadgeBackgroundColor({ color: "#4caf50" });
 }
 
-// function to notify popup
+// Function to notify popup safely (only if it's open)
 function notifyPopup(count) {
   chrome.runtime.sendMessage({ type: "PROMPT_COUNT_UPDATED", count }, () => {
     if (chrome.runtime.lastError) {
-      // popup not open
+      // Popup not open, this is expected and fine
     }
   });
 }
