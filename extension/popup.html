@@ -3,36 +3,22 @@
   <head>
     <meta charset="UTF-8" />
     <title>Prompt Tracker</title>
-    <!-- <style>
-      body {
-        font-family: sans-serif;
-        padding: 10px;
-        width: 150px;
-      }
-      h1 {
-        font-size: 16px;
-        margin-bottom: 5px;
-      }
-      #count {
-        font-size: 24px;
-        font-weight: bold;
-      }
-    </style> -->
 
+    <link rel="stylesheet" href="styles.css" />
     <script src="https://cdn.tailwindcss.com"></script>
   </head>
-  <body class="min-w-[400px] p-2.5 bg-gray-100 border-2 border-red-500">
+  <body>
     <!-- <h1>Prompts Sent</h1>
     <div id="count">0</div> -->
 
     <!-- Welcome Screen -->
-    <div class="flex flex-col items-center justify-center">
+    <div class="content-container">
       <h1>Welcome to co2ounter</h1>
-      <img src="icons/happy_cat.svg" />
+      <img src="/icons/happy_cat.svg" />
 
-      <div>
-        <button>Login</button>
-        <button>Register</button>
+      <div class="buttons-container">
+        <button class="entry-button">Login</button>
+        <button class="entry-button">Register</button>
       </div>
     </div>
 
