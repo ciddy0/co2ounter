@@ -4,6 +4,7 @@ document.addEventListener("DOMContentLoaded", function () {
   const inputTokensEl = document.getElementById("inputTokens");
   const outputTokensEl = document.getElementById("outputTokens");
   const totalTokensEl = document.getElementById("totalTokens");
+  const co2El = document.getElementById("co2");
 
   function updateStats(stats) {
     if (countEl) countEl.innerText = (stats.promptCount || 0).toLocaleString();
@@ -17,6 +18,11 @@ document.addEventListener("DOMContentLoaded", function () {
       const total =
         (stats.totalInputTokens || 0) + (stats.totalOutputTokens || 0);
       totalTokensEl.innerText = total.toLocaleString();
+    }
+    if (co2El) {
+      const grams = stats.totalCO2 || 0;
+      co2El.innerText =
+        grams < 1 ? `${(grams * 1000).toFixed(2)} mg` : `${grams.toFixed(3)} g`;
     }
   }
 
