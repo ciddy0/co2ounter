@@ -1,25 +1,40 @@
-// app/backend/middleware/verifyToken.js
-const { auth } = require("../firebase");
+// app/backend/middleware/verifyToken.js - Updated to use custom JWT
+const jwt = require("jsonwebtoken");
 
 async function verifyToken(req, res, next) {
   const header = req.headers.authorization || "";
   const match = header.match(/^Bearer (.+)$/);
-  const idToken = match ? match[1] : null;
+  const token = match ? match[1] : null;
 
-  if (!idToken) {
+  if (!token) {
     return res.status(401).json({ error: "Missing Authorization header" });
   }
 
   try {
-    const decoded = await auth.verifyIdToken(idToken);
+    // Verify custom JWT (not Firebase token)
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+    // Check if token is for extension use
+    if (decoded.type !== "extension") {
+      return res.status(401).json({ error: "Invalid token type" });
+    }
+
+    // Attach user info to request
     req.user = {
       uid: decoded.uid,
-      email: decoded.email || null,
+      email: decoded.email,
     };
+
+    console.log("✅ Token verified for user:", decoded.uid);
     next();
   } catch (err) {
-    console.error("verifyToken failed:", err);
-    return res.status(401).json({ error: "Invalid or expired ID token" });
+    console.error("verifyToken failed:", err.message);
+
+    if (err.name === "TokenExpiredError") {
+      return res.status(401).json({ error: "Token expired" });
+    }
+
+    return res.status(401).json({ error: "Invalid or expired token" });
   }
 }
 

@@ -43,20 +43,51 @@ export default function LoginPage() {
         password
       );
       const user = userCredential.user;
-      const token = await user.getIdToken();
+      // Step 2: Get Firebase ID token
+      const firebaseIdToken = await user.getIdToken();
+      console.log("🔑 Got Firebase ID token");
 
-      // Store token for Chrome extension or fallback to localStorage
-      if (typeof chrome !== "undefined" && chrome.storage?.sync) {
-        chrome.storage.sync.set({ firebaseToken: token }, () => {
-          console.log("✅ Firebase token stored in chrome.storage.sync");
-        });
-      } else {
-        localStorage.setItem("firebaseToken", token);
-        console.log("✅ Firebase token stored in localStorage");
+      // Step 3: Exchange Firebase token for custom extension token
+      // Step 3: Exchange Firebase token for custom extension token
+      const response = await fetch(
+        "http://localhost:4000/api/auth/extension-token",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ idToken: firebaseIdToken }),
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to generate extension token");
       }
 
-      // Navigate to home page
-      router.push("/");
+      console.log("✅ Custom extension token generated");
+
+      // Step 4: Send custom token to extension via postMessage
+      window.postMessage(
+        {
+          type: "FIREBASE_TOKEN",
+          token: data.token, // This is the custom 30-day JWT
+          user: data.user,
+        },
+        "*"
+      );
+
+      // Also store in localStorage for web app use
+      localStorage.setItem("firebaseToken", data.token);
+      console.log("💾 Token saved to localStorage");
+
+      // Show success message
+      alert("✅ Login successful! Extension is now connected.");
+      setTimeout(() => {
+        console.log("✅ Navigating to home...");
+        router.push("/");
+      }, 300);
     } catch (err) {
       console.error(err);
       alert(err.message);

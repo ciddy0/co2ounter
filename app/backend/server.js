@@ -5,7 +5,8 @@ const bodyParser = require("body-parser");
 const cors = require("cors");
 const { db, FieldValue } = require("./firebase");
 const verifyToken = require("./middleware/verifyToken");
-
+const admin = require("firebase-admin");
+const jwt = require("jsonwebtoken");
 const PORT = process.env.PORT || 4000;
 const app = express();
 
@@ -35,11 +36,61 @@ function todayKey(date = new Date()) {
 // Health
 app.get("/health", (req, res) => res.json({ ok: true }));
 
+// ------------------ GET /api/stats ------------------
+// Returns today's stats and user info
+app.get("/api/stats", verifyToken, async (req, res) => {
+  const uid = req.user.uid;
+  const userRef = db.collection("users").doc(uid);
+  const today = todayKey();
+  const historyRef = userRef.collection("history").doc(today);
+
+  try {
+    const [userDoc, todayDoc] = await Promise.all([
+      userRef.get(),
+      historyRef.get(),
+    ]);
+
+    const userData = userDoc.data() || {};
+    const todayData = todayDoc.data() || {};
+
+    // Check daily limits
+    const exceeded = { prompts: false, co2: false };
+    const dailyLimitPrompts = Number(userData.dailyLimitPrompts || 0);
+    const dailyLimitCo2 = Number(userData.dailyLimitCo2 || 0);
+
+    if (
+      dailyLimitPrompts > 0 &&
+      Number(todayData.promptCount || 0) >= dailyLimitPrompts
+    ) {
+      exceeded.prompts = true;
+    }
+    if (dailyLimitCo2 > 0 && Number(todayData.co2Total || 0) >= dailyLimitCo2) {
+      exceeded.co2 = true;
+    }
+
+    return res.json({
+      success: true,
+      user: {
+        username: userData.username || null,
+        promptTotal: userData.promptTotal || 0,
+        co2Total: userData.co2Total || 0,
+        dailyLimitPrompts: userData.dailyLimitPrompts || 0,
+        dailyLimitCo2: userData.dailyLimitCo2 || 0,
+      },
+      today: {
+        promptCount: todayData.promptCount || 0,
+        co2Total: todayData.co2Total || 0,
+        outputTokens: todayData.outputTokens || 0,
+      },
+      exceeded,
+    });
+  } catch (err) {
+    console.error("/api/stats error:", err);
+    return res.status(500).json({ error: "Failed to fetch stats" });
+  }
+});
+
 // ------------------ /api/prompt ------------------
-// Expects body: { model: "chatgpt"|"claude"|"gemini", inputTokens: number, co2: number }
-// increments: users/{uid}.promptTotal, users/{uid}.co2Total,
-//            users/{uid}.modelTotals.{model}.prompts & co2
-//            users/{uid}/history/{YYYY-MM-DD}.promptCount, co2Total, modelBreakdown.{model}.prompts & co2
 app.post("/api/prompt", verifyToken, async (req, res) => {
   const uid = req.user.uid;
   const { model = "chatgpt", inputTokens = 0, co2 = 0 } = req.body;
@@ -56,7 +107,6 @@ app.post("/api/prompt", verifyToken, async (req, res) => {
     await db.runTransaction(async (tx) => {
       const userSnap = await tx.get(userRef);
       if (!userSnap.exists) {
-        // create minimal user doc (so leaderboards work)
         tx.set(
           userRef,
           {
@@ -71,7 +121,6 @@ app.post("/api/prompt", verifyToken, async (req, res) => {
         );
       }
 
-      // user-level increments
       const mtPromptsPath = `modelTotals.${model}.prompts`;
       const mtCo2Path = `modelTotals.${model}.co2`;
       tx.set(
@@ -85,7 +134,6 @@ app.post("/api/prompt", verifyToken, async (req, res) => {
         { merge: true }
       );
 
-      // today's history increments
       tx.set(
         historyRef,
         {
@@ -95,17 +143,14 @@ app.post("/api/prompt", verifyToken, async (req, res) => {
         { merge: true }
       );
 
-      // nested increments for modelBreakdown
       const mbPromptsPath = `modelBreakdown.${model}.prompts`;
       const mbCo2Path = `modelBreakdown.${model}.co2`;
-      // use update (if doc didn't exist set above created it); update will create fields if parent exists
       tx.update(historyRef, {
         [mbPromptsPath]: FieldValue.increment(1),
         [mbCo2Path]: FieldValue.increment(Number(co2)),
       });
     });
 
-    // fetch updated docs to return status
     const [userDoc, todayDoc] = await Promise.all([
       userRef.get(),
       historyRef.get(),
@@ -114,7 +159,6 @@ app.post("/api/prompt", verifyToken, async (req, res) => {
     const userData = userDoc.data() || {};
     const todayData = todayDoc.data() || {};
 
-    // check daily limits
     const exceeded = { prompts: false, co2: false };
     const dailyLimitPrompts = Number(userData.dailyLimitPrompts || 0);
     const dailyLimitCo2 = Number(userData.dailyLimitCo2 || 0);
@@ -142,10 +186,6 @@ app.post("/api/prompt", verifyToken, async (req, res) => {
 });
 
 // ------------------ /api/response ------------------
-// Expects body: { model: "chatgpt"|"claude"|"gemini", outputTokens: number, co2: number }
-// increments: users/{uid}.outputTokens, users/{uid}.co2Total,
-//            users/{uid}.modelTotals.{model}.outputTokens & co2
-//            users/{uid}/history/{YYYY-MM-DD}.outputTokens, co2Total, modelBreakdown.{model}.outputTokens & co2
 app.post("/api/response", verifyToken, async (req, res) => {
   const uid = req.user.uid;
   const { model = "chatgpt", outputTokens = 0, co2 = 0 } = req.body;
@@ -190,7 +230,6 @@ app.post("/api/response", verifyToken, async (req, res) => {
         { merge: true }
       );
 
-      // update today's history
       tx.set(
         historyRef,
         {
@@ -216,7 +255,6 @@ app.post("/api/response", verifyToken, async (req, res) => {
     const userData = userDoc.data() || {};
     const todayData = todayDoc.data() || {};
 
-    // CO2 limit check (responses may add CO2)
     const exceeded = { co2: false };
     const dailyLimitCo2 = Number(userData.dailyLimitCo2 || 0);
     if (dailyLimitCo2 > 0 && Number(todayData.co2Total || 0) >= dailyLimitCo2) {
@@ -260,6 +298,46 @@ app.get("/leaderboard", async (req, res) => {
   } catch (err) {
     console.error("leaderboard error:", err);
     return res.status(500).json({ error: "Failed to fetch leaderboard" });
+  }
+});
+app.post("/api/auth/extension-token", async (req, res) => {
+  const { idToken } = req.body;
+
+  if (!idToken) {
+    return res.status(400).json({ error: "ID token is required" });
+  }
+
+  try {
+    // Verify Firebase ID token
+    const decodedToken = await admin.auth().verifyIdToken(idToken);
+    const uid = decodedToken.uid;
+
+    // Get user data from Firestore
+    const userDoc = await db.collection("users").doc(uid).get();
+    const userData = userDoc.data() || {};
+
+    // Generate custom 30-day JWT
+    const customToken = jwt.sign(
+      {
+        uid,
+        email: decodedToken.email,
+      },
+      process.env.JWT_SECRET,
+      { expiresIn: "30d" }
+    );
+
+    return res.json({
+      success: true,
+      token: customToken,
+      user: {
+        uid,
+        email: decodedToken.email,
+        username: userData.username || null,
+      },
+    });
+  } catch (err) {
+    console.error("/api/auth/extension-token error:", err);
+    return res.status(401).json({ error: "Invalid Firebase token" });
   }
 });
 

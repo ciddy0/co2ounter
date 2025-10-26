@@ -39,7 +39,18 @@ header,
   gap: 16px;
   margin: 16px;
 }
+/* User info section */
+.user-info-container {
+  padding: 8px 16px;
+  background: #f0f9ff;
+  border-bottom: 1px solid #bae6fd;
+}
 
+.user-info-text {
+  margin: 0;
+  font-size: 13px;
+  color: #0c4a6e;
+}
 .stats-container {
   display: flex;
   gap: 32px;
