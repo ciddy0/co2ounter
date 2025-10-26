@@ -163,26 +163,23 @@ document.addEventListener("DOMContentLoaded", async () => {
   // Logout handler
   if (logoutBtn) {
     logoutBtn.addEventListener("click", async () => {
-      if (confirm("Are you sure you want to log out?")) {
-        try {
-          // Send logout message to background script
-          chrome.runtime.sendMessage({ type: "LOGOUT" }, (response) => {
-            if (chrome.runtime.lastError) {
-              console.error("Logout error:", chrome.runtime.lastError);
-              return;
-            }
+      try {
+        // Send logout message to background script
+        chrome.runtime.sendMessage({ type: "LOGOUT" }, (response) => {
+          if (chrome.runtime.lastError) {
+            console.error("Logout error:", chrome.runtime.lastError);
+            return;
+          }
 
-            if (response && response.success) {
-              console.log("✅ Logged out successfully");
-              // The background script will update the popup to welcome-popup.html
-              // So we just close this popup
-              window.close();
-            }
-          });
-        } catch (error) {
-          console.error("❌ Logout failed:", error);
-          alert("Failed to log out. Please try again.");
-        }
+          if (response && response.success) {
+            console.log("✅ Logged out successfully");
+            // Close the popup
+            window.close();
+          }
+        });
+      } catch (error) {
+        console.error("❌ Logout failed:", error);
+        alert("Failed to log out. Please try again.");
       }
     });
   }
@@ -262,7 +259,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
       const data = await response.json();
       if (data.success) {
-        alert("✅ Daily limits updated successfully!");
         fetchStats(); // refresh UI
         modal.style.display = "none";
       } else {

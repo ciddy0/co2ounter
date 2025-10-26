@@ -86,9 +86,29 @@ async function updateBadgeFromFirebase() {
   const stats = await fetchStatsFromBackend();
   if (stats && stats.success) {
     const count = stats.today.promptCount || 0;
-    chrome.action.setBadgeText({ text: count.toString() });
-    chrome.action.setBadgeBackgroundColor({ color: "#D22B2B" });
-    console.log("🔖 Badge updated:", count);
+    const userLimit = stats.user.dailyLimitPrompts || 50;
+
+    let badgeText =
+      count > userLimit
+        ? count > 99
+          ? "99!+"
+          : count.toString() + "!"
+        : count.toString();
+
+    chrome.action.setBadgeText({ text: badgeText });
+
+    // Determine badge color based on count
+    let color = "#B2FBA5"; // light green
+    if (count >= 50) {
+      color = "#FF0000"; // red
+    } else if (count >= 30) {
+      color = "#FFA500"; // orange
+    } else if (count >= 20) {
+      color = "#FDDA0D"; // yellow
+    }
+
+    chrome.action.setBadgeBackgroundColor({ color });
+    console.log("🔖 Badge updated:", count, "Color:", color);
   } else {
     // Clear badge if no stats available
     chrome.action.setBadgeText({ text: "" });

@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "co2ounter",
   "version": "1.0",
-  "permissions": ["storage", "scripting"],
+  "permissions": ["storage", "scripting", "notifications"],
   "host_permissions": [
     "https://chat.openai.com/*",
     "https://chatgpt.com/*",
