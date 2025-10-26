@@ -1,18 +1,45 @@
 {
   "manifest_version": 3,
-  "name": "Co2oounter",
+  "name": "co2ounter",
   "version": "1.0",
-  "description": "Count how mnay prompts you are making",
-  "permissions": ["storage", "webRequest", "webRequestBlocking"],
+  "permissions": ["storage", "scripting", "notifications"],
   "host_permissions": [
     "https://chat.openai.com/*",
     "https://chatgpt.com/*",
     "https://claude.ai/*",
-    "https://gemini.google.com/*"
+    "https://our-frontend-domain.com/*",
+    "http://localhost:3000/*"
+  ],
+  "externally_connectable": {
+    "matches": ["http://localhost:3000/*"]
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://chat.openai.com/*",
+        "https://chatgpt.com/*",
+        "https://claude.ai/*",
+        "https://our-frontend-domain.com/*",
+        "http://localhost:3000/*"
+      ],
+      "js": ["content.js"],
+      "run_at": "document_start"
+    }
   ],
   "background": {
     "service_worker": "background.js"
   },
+  "web_accessible_resources": [
+    {
+      "resources": ["injected.js"],
+      "matches": [
+        "https://chat.openai.com/*",
+        "https://chatgpt.com/*",
+        "http://localhost:3000/*",
+        "https://claude.ai/*"
+      ]
+    }
+  ],
   "action": {
     "default_popup": "welcome-popup.html",
     "default_icon": "leaf.png"

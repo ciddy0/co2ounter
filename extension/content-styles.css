@@ -21,7 +21,7 @@ header,
 .limit-container {
   width: 100%;
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   /* align-items: flex-start; */
 }
 
@@ -31,21 +31,54 @@ header,
   gap: 8px;
 }
 
+.logout-button {
+  background-color: #ff6b6b;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.logout-button:hover {
+  background-color: #ff5252;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(255, 107, 107, 0.3);
+}
+
+.logout-button:active {
+  transform: translateY(0);
+}
+
+.logout-button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+  transform: none;
+}
+
 .prompt-content-container {
   text-align: center;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 24px;
+  gap: 16px;
 }
 
 .prompt-content-container:not(.prompt-message) {
   gap: 16px;
+  margin: 16px;
 }
 
 .stats-container {
   display: flex;
-  gap: 40px;
+  gap: 32px;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
 }
 
 .bottom-content-container {
@@ -61,18 +94,30 @@ header,
 }
 
 .stats-data {
-  font-size: 3.75rem;
+  font-size: 2rem;
 }
 
 .prompt-message {
   font-size: 1.25rem;
-  margin-bottom: 16px;
 }
 
 .dashboard-button {
-  width: 100%;
+  width: 90%;
   height: 35px;
   border-radius: 5px;
+  background-color: #c99cfb;
+  color: white;
+  border: none;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.dashboard-button:hover {
+  background-color: #b38df8;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 
 .details-text {
@@ -99,4 +144,190 @@ header,
 
 .cat-icon {
   width: 80%;
+}
+
+/* Daily limits section  */
+#limitsContainer {
+  position: relative;
+  background: #2a2a2a;
+  border: 1px solid #3a3a3a;
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 0.85rem;
+  line-height: 1.4;
+  color: #f2f0ef;
+  width: 90%;
+  box-sizing: border-box;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Edit icon inside limits container */
+.edit-icon {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.edit-icon:hover {
+  transform: scale(1.2);
+}
+
+#limitsContainer div {
+  width: 100%;
+  max-width: 220px;
+}
+
+#limitsContainer strong {
+  color: #bae6fd;
+  display: inline-block;
+  min-width: 70px;
+}
+
+/* Progress bar base */
+.limit-bar {
+  position: relative;
+  height: 8px;
+  background: #3a3a3a;
+  border-radius: 4px;
+  overflow: hidden;
+  margin-top: 4px;
+  width: 100%;
+}
+
+.set-limits-container {
+  display: flex;
+  justify-content: flex-end;
+  width: 90%;
+  margin: 0 auto;
+}
+
+.set-limits-button {
+  background-color: #38bdf8;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.set-limits-button:hover {
+  background-color: #0ea5e9;
+  box-shadow: 0 2px 8px rgba(56, 189, 248, 0.3);
+}
+
+/* Modal overlay */
+.modal {
+  display: none; /* hidden by default */
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Modal box */
+.modal-content {
+  background-color: #2a2a2a;
+  color: #f2f0ef;
+  padding: 16px;
+  border-radius: 8px;
+  width: 220px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  box-sizing: border-box;
+}
+
+/* Inputs */
+.modal-content input {
+  width: 100%;
+  padding: 6px 8px;
+  border-radius: 4px;
+  border: 1px solid #3a3a3a;
+  background: #1e1e1e;
+  color: #f2f0ef;
+  font-size: 0.9rem;
+  box-sizing: border-box;
+  appearance: none;
+}
+
+.modal-content input[type="number"]::-webkit-outer-spin-button,
+.modal-content input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Buttons container */
+.modal-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.modal-content h2 {
+  text-align: center;
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin: 0;
+  color: #38bdf8;
+}
+
+/* Buttons */
+.modal-buttons button {
+  padding: 6px 12px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+#modalCancelBtn {
+  background-color: #555;
+  color: white;
+}
+
+#modalCancelBtn:hover {
+  background-color: #777;
+}
+
+#modalSaveBtn {
+  background-color: #38bdf8;
+  color: white;
+}
+
+#modalSaveBtn:hover {
+  background-color: #0ea5e9;
+}
+
+.today-header {
+  align-self: flex-center;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #bae6fd;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+  margin-top: 0;
+  margin-bottom: 10px;
+}
+
+.today-stats {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px; /* smaller gap between Today: and stats */
+  width: 100%;
 }

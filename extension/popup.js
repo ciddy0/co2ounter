@@ -1,64 +1,48 @@
 // popup.js
-// Wait for DOM to be ready
-document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener("DOMContentLoaded", () => {
   const countEl = document.getElementById("count");
-  const inputTokensEl = document.getElementById("inputTokens");
-  const outputTokensEl = document.getElementById("outputTokens");
-  const totalTokensEl = document.getElementById("totalTokens");
+  const inputEl = document.getElementById("inputTokens");
+  const outputEl = document.getElementById("outputTokens");
+  const totalEl = document.getElementById("totalTokens");
+  const co2El = document.getElementById("co2");
+
+  // Login/Register buttons
+  const loginBtn = document.querySelectorAll(".entry-button")[0];
+  const registerBtn = document.querySelectorAll(".entry-button")[1];
+
+  loginBtn.addEventListener("click", () => {
+    chrome.tabs.create({ url: "http://localhost:3000/login" });
+  });
+
+  registerBtn.addEventListener("click", () => {
+    chrome.tabs.create({ url: "http://localhost:3000/register" });
+  });
 
   function updateStats(stats) {
-    if (countEl) {
-      countEl.innerText = (stats.promptCount || 0).toLocaleString();
-    }
-
-    if (inputTokensEl) {
-      inputTokensEl.innerText = (stats.totalInputTokens || 0).toLocaleString();
-    }
-
-    if (outputTokensEl) {
-      outputTokensEl.innerText = (
-        stats.totalOutputTokens || 0
+    if (countEl) countEl.innerText = (stats.promptCount || 0).toLocaleString();
+    if (inputEl)
+      inputEl.innerText = (stats.totalInputTokens || 0).toLocaleString();
+    if (outputEl)
+      outputEl.innerText = (stats.totalOutputTokens || 0).toLocaleString();
+    if (totalEl)
+      totalEl.innerText = (
+        (stats.totalInputTokens || 0) + (stats.totalOutputTokens || 0)
       ).toLocaleString();
-    }
-
-    if (totalTokensEl) {
-      const totalTokens =
-        (stats.totalInputTokens || 0) + (stats.totalOutputTokens || 0);
-      totalTokensEl.innerText = totalTokens.toLocaleString();
-    }
+    if (co2El) co2El.innerText = (stats.totalCO2 || 0).toFixed(2) + " g";
   }
 
-  // Ask background for current stats when popup opens
-  chrome.runtime.sendMessage({ type: "GET_STATS" }, (response) => {
-    if (response) {
-      updateStats(response);
+  // Initial read
+  chrome.storage.local.get(
+    ["promptCount", "totalInputTokens", "totalOutputTokens", "totalCO2"],
+    (data) => {
+      updateStats(data);
     }
-  });
+  );
 
-  // Listen for live updates
+  // Live updates
   chrome.runtime.onMessage.addListener((message) => {
     if (message.type === "STATS_UPDATED") {
-      updateStats({
-        promptCount: message.promptCount,
-        totalInputTokens: message.totalInputTokens,
-        totalOutputTokens: message.totalOutputTokens,
-      });
+      updateStats(message.stats);
     }
   });
-
-  // Optional: Add reset button handler if you have one
-  const resetButton = document.getElementById("resetButton");
-  if (resetButton) {
-    resetButton.addEventListener("click", () => {
-      chrome.runtime.sendMessage({ type: "RESET_STATS" }, (response) => {
-        if (response && response.success) {
-          updateStats({
-            promptCount: 0,
-            totalInputTokens: 0,
-            totalOutputTokens: 0,
-          });
-        }
-      });
-    });
-  }
 });
