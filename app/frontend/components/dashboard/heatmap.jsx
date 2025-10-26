@@ -2,10 +2,10 @@
 import CalendarHeatmap from "react-calendar-heatmap";
 import { Tooltip } from "react-tooltip";
 import "./heatmap.css";
-import databaseValues from "../../data.js";
 
-const Heatmap = () => {
+const Heatmap = ({ data }) => {
   const today = new Date();
+  
   const shiftDate = (date, days) => {
     const newDate = new Date(date);
     newDate.setDate(newDate.getDate() + days);
@@ -16,13 +16,17 @@ const Heatmap = () => {
     const startDate = shiftDate(today, -364);
     const endDate = today;
     const completeValues = [];
-
+    
+    // Create a map from the data prop
     const dataMap = new Map();
-    databaseValues.forEach((item) => {
-      const dateKey = item.date.toDateString();
-      dataMap.set(dateKey, item.count);
-    });
+    if (data && Array.isArray(data)) {
+      data.forEach((item) => {
+        const dateKey = item.date.toDateString();
+        dataMap.set(dateKey, item.count);
+      });
+    }
 
+    // Fill in all dates for the past year
     const currentDate = new Date(startDate);
     while (currentDate <= endDate) {
       const dateKey = currentDate.toDateString();
@@ -37,10 +41,16 @@ const Heatmap = () => {
   };
 
   const values = generateCompleteValues();
-  const totalPrompts = databaseValues.reduce(
-    (sum, item) => sum + item.count,
-    0
-  );
+  
+  // Calculate total prompts from the data prop
+  const totalPrompts = data && Array.isArray(data) 
+    ? data.reduce((sum, item) => sum + item.count, 0)
+    : 0;
+
+  // Calculate max count for scaling
+  const maxCount = data && Array.isArray(data) 
+    ? Math.max(...data.map((d) => d.count), 1) // Minimum of 1 to avoid division by zero
+    : 1;
 
   return (
     <div className="flex flex-col gap-4 p-6 bg-white rounded-3xl h-full">
@@ -56,11 +66,8 @@ const Heatmap = () => {
             if (!value || value.count === 0) {
               return "color-empty";
             }
-
-            // Scale the count to 1-4 range based on your data
-            const maxCount = Math.max(...databaseValues.map((d) => d.count));
-
-            // Map count to 1-5 scale (better granularity)
+            
+            // Map count to 1-5 scale based on percentage of max
             let level;
             if (value.count >= maxCount * 0.8) level = 5; // Darkest
             else if (value.count >= maxCount * 0.6) level = 4; // Very dark
@@ -85,9 +92,7 @@ const Heatmap = () => {
             }
             return {
               "data-tooltip-id": "heatmap-tooltip",
-              "data-tooltip-content": `${
-                value.count
-              } prompts on ${value.date.toDateString()}`,
+              "data-tooltip-content": `${value.count} prompts on ${value.date.toDateString()}`,
             };
           }}
           showMonthLabels

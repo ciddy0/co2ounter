@@ -347,7 +347,94 @@ app.get("/leaderboard", async (req, res) => {
     return res.status(500).json({ error: "Failed to fetch leaderboard" });
   }
 });
+// ------------------ GET /api/history/year ------------------
+app.get("/api/history/year", verifyToken, async (req, res) => {
+  const uid = req.user.uid;
 
+  try {
+    const userRef = db.collection("users").doc(uid);
+    const historyRef = userRef.collection("history");
+
+    // Get all history documents
+    const snapshot = await historyRef.orderBy("timestamp", "desc").get();
+
+    const history = [];
+    snapshot.forEach((doc) => {
+      const data = doc.data();
+      history.push({
+        date: doc.id, // The document ID is the date string (YYYY-MM-DD)
+        promptCount: data.promptCount || 0,
+        co2Total: data.co2Total || 0,
+        outputTokens: data.outputTokens || 0,
+        timestamp: data.timestamp,
+        modelBreakdown: data.modelBreakdown || {},
+      });
+    });
+
+    return res.json({
+      success: true,
+      history,
+    });
+  } catch (err) {
+    console.error("/api/history/year error:", err);
+    return res.status(500).json({ error: "Failed to fetch history" });
+  }
+});
+
+// ------------------ GET /api/history/range ------------------
+// Optional: Get history for a specific date range
+app.get("/api/history/range", verifyToken, async (req, res) => {
+  const uid = req.user.uid;
+  const { startDate, endDate } = req.query;
+
+  if (!startDate || !endDate) {
+    return res
+      .status(400)
+      .json({ error: "startDate and endDate are required" });
+  }
+
+  try {
+    const userRef = db.collection("users").doc(uid);
+    const historyRef = userRef.collection("history");
+
+    // Query with date range
+    const snapshot = await historyRef
+      .where(
+        "timestamp",
+        ">=",
+        admin.firestore.Timestamp.fromDate(new Date(startDate))
+      )
+      .where(
+        "timestamp",
+        "<=",
+        admin.firestore.Timestamp.fromDate(new Date(endDate))
+      )
+      .orderBy("timestamp", "desc")
+      .get();
+
+    const history = [];
+    snapshot.forEach((doc) => {
+      const data = doc.data();
+      history.push({
+        date: doc.id,
+        promptCount: data.promptCount || 0,
+        co2Total: data.co2Total || 0,
+        outputTokens: data.outputTokens || 0,
+        timestamp: data.timestamp,
+        modelBreakdown: data.modelBreakdown || {},
+      });
+    });
+
+    return res.json({
+      success: true,
+      history,
+      range: { startDate, endDate },
+    });
+  } catch (err) {
+    console.error("/api/history/range error:", err);
+    return res.status(500).json({ error: "Failed to fetch history" });
+  }
+});
 // Extension token exchange endpoint
 app.post("/api/auth/extension-token", async (req, res) => {
   const { idToken } = req.body;
