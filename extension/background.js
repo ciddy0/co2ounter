@@ -90,8 +90,8 @@ async function updateBadgeFromFirebase() {
 
     let badgeText =
       count > userLimit
-        ? count > 99
-          ? "99!+"
+        ? count > 999
+          ? "999!+"
           : count.toString() + "!"
         : count.toString();
 
@@ -100,9 +100,9 @@ async function updateBadgeFromFirebase() {
     // Determine badge color based on count
     let color = "#B2FBA5"; // light green
     if (count >= 50) {
-      color = "#FF0000"; // red
+      color = "#AA4A44"; // red
     } else if (count >= 30) {
-      color = "#FFA500"; // orange
+      color = "#E49B0F"; // orange
     } else if (count >= 20) {
       color = "#FDDA0D"; // yellow
     }

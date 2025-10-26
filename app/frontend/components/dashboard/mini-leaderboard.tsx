@@ -63,7 +63,7 @@ const MiniLeaderboard = () => {
           rank: index + 1,
           username: entry.username || "Anonymous",
           promptTotal: entry.promptTotal || 0,
-          co2Total: parseFloat((entry.co2Total / 1000).toFixed(2)) || 0, // Convert to kg
+          co2Total: parseFloat((entry.co2Total || 0).toFixed(2)), // Keep in grams
           isCurrentUser: entry.username === currentUsername,
         })
       );
@@ -125,7 +125,7 @@ const MiniLeaderboard = () => {
         <div>Rank</div>
         <div>Name</div>
         <div className="text-right">Prompts</div>
-        <div className="text-right">CO2 (kg)</div>
+        <div className="text-right">CO2 (g)</div>
       </div>
 
       <div className="space-y-2">

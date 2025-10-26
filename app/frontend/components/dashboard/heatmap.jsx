@@ -5,7 +5,7 @@ import "./heatmap.css";
 
 const Heatmap = ({ data }) => {
   const today = new Date();
-  
+
   const shiftDate = (date, days) => {
     const newDate = new Date(date);
     newDate.setDate(newDate.getDate() + days);
@@ -16,19 +16,22 @@ const Heatmap = ({ data }) => {
     const startDate = shiftDate(today, -364);
     const endDate = today;
     const completeValues = [];
-    
+
     // Create a map from the data prop
+    const dataMap = new Map(); // ✅ FIXED: Declare the Map
+    
     if (data && Array.isArray(data)) {
       data.forEach((item) => {
-        const dateKey = `${item.date.getUTCFullYear()}-${item.date.getUTCMonth()}-${item.date.getUTCDate()}`;
-      dataMap.set(dateKey, item.count);
+        // ✅ FIXED: Use getUTCMonth() + 1 for correct month
+        const dateKey = `${item.date.getUTCFullYear()}-${item.date.getUTCMonth() + 1}-${item.date.getUTCDate()}`;
+        dataMap.set(dateKey, item.count);
       });
     }
 
     // Fill in all dates for the past year
     const currentDate = new Date(startDate);
     while (currentDate <= endDate) {
-      const dateKey = `${currentDate.getUTCFullYear()}-${currentDate.getUTCMonth()}-${currentDate.getUTCDate()}`;
+      const dateKey = `${currentDate.getUTCFullYear()}-${currentDate.getUTCMonth() + 1}-${currentDate.getUTCDate()}`;
       completeValues.push({
         date: new Date(currentDate),
         count: dataMap.get(dateKey) || 0,
@@ -40,14 +43,15 @@ const Heatmap = ({ data }) => {
   };
 
   const values = generateCompleteValues();
-  
+
   // Calculate total prompts from the data prop
-  const totalPrompts = data && Array.isArray(data) 
-    ? data.reduce((sum, item) => sum + item.count, 0)
-    : 0;
+  const totalPrompts =
+    data && Array.isArray(data)
+      ? data.reduce((sum, item) => sum + item.count, 0)
+      : 0;
 
   // Calculate max count for scaling
-  const maxCount = data && Array.isArray(data) 
+  const maxCount = data && Array.isArray(data) && data.length > 0
     ? Math.max(...data.map((d) => d.count), 1) // Minimum of 1 to avoid division by zero
     : 1;
 
@@ -66,8 +70,7 @@ const Heatmap = ({ data }) => {
               return "color-empty";
             }
 
-            const maxCount = Math.max(...databaseValues.map((d) => d.count));
-
+            // ✅ FIXED: Use maxCount from the outer scope instead of undefined databaseValues
             let level;
             if (value.count >= maxCount * 0.8) level = 5;
             else if (value.count >= maxCount * 0.6) level = 4;
@@ -92,7 +95,9 @@ const Heatmap = ({ data }) => {
             }
             return {
               "data-tooltip-id": "heatmap-tooltip",
-              "data-tooltip-content": `${value.count} prompts on ${value.date.toDateString()}`,
+              "data-tooltip-content": `${
+                value.count
+              } prompts on ${value.date.toDateString()}`,
             };
           }}
           showMonthLabels

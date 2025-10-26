@@ -65,7 +65,7 @@ export default function Leaderboard() {
         rank: index + 1,
         username: entry.username || "Anonymous",
         promptTotal: entry.promptTotal || 0,
-        co2Total: parseFloat((entry.co2Total / 1000).toFixed(2)) || 0, // g → kg
+        co2Total: parseFloat((entry.co2Total || 0).toFixed(2)), // Keep in grams
         isCurrentUser: entry.username === username,
       }));
 
@@ -150,7 +150,7 @@ export default function Leaderboard() {
                 </p>
               </div>
               <div>
-                <p className="text-gray-500">Total CO2 (kg)</p>
+                <p className="text-gray-500">Total CO2 (g)</p>
                 <p className="font-semibold text-gray-800">
                   {user.co2Total}
                 </p>
@@ -194,7 +194,7 @@ export default function Leaderboard() {
                   </p>
                 </div>
                 <div className="text-center">
-                  <p className="text-gray-500">CO2 (kg)</p>
+                  <p className="text-gray-500">CO2 (g)</p>
                   <p className="font-semibold text-gray-800">
                     {user.co2Total}
                   </p>
