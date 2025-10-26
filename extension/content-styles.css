@@ -83,6 +83,9 @@ header,
 .stats-container {
   display: flex;
   gap: 32px;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
 }
 
 .bottom-content-container {
@@ -297,4 +300,22 @@ header,
 
 #modalSaveBtn:hover {
   background-color: #0ea5e9;
+}
+
+.today-header {
+  align-self: flex-start;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #bae6fd;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.today-stats {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px; /* smaller gap between Today: and stats */
+  width: 100%;
 }
