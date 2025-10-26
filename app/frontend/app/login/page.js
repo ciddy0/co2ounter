@@ -48,26 +48,40 @@ export default function LoginPage() {
   };
 
   return (
-    <div style={{ padding: 20 }}>
-      <h1>Login</h1>
-      <form onSubmit={handleLogin}>
-        <div>
-          <input
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="email"
-          />
-        </div>
-        <div>
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="password"
-          />
-        </div>
-        <button type="submit">Sign in</button>
-      </form>
-    </div>
+    // <div style={{ padding: 20 }}>
+    //   <h1>Login to your account</h1>
+    //   <form onSubmit={handleLogin}>
+    //     <div>
+    //       <input
+    //         value={email}
+    //         onChange={(e) => setEmail(e.target.value)}
+    //         placeholder="email"
+    //       />
+    //     </div>
+    //     <div>
+    //       <input
+    //         type="password"
+    //         value={password}
+    //         onChange={(e) => setPassword(e.target.value)}
+    //         placeholder="password"
+    //       />
+    //     </div>
+    //     <button type="submit">Sign in</button>
+    //   </form>
+    // </div>
+
+    <Card>
+      <CardHeader>
+        <CardTitle>Card Title</CardTitle>
+        <CardDescription>Card Description</CardDescription>
+        <CardAction>Card Action</CardAction>
+      </CardHeader>
+      <CardContent>
+        <p>Card Content</p>
+      </CardContent>
+      <CardFooter>
+        <p>Card Footer</p>
+      </CardFooter>
+    </Card>
   );
 }
