@@ -85,7 +85,7 @@ export default function LoginPage() {
       alert("✅ Login successful! Extension is now connected.");
       setTimeout(() => {
         console.log("✅ Navigating to home...");
-        router.push("/");
+        router.push("/dashboard");
       }, 300);
     } catch (err) {
       console.error(err);
