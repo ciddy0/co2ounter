@@ -298,7 +298,7 @@ export default function Dashboard() {
       {/* Charts Grid */}
       <div className="flex gap-6 mb-4">
         <div className="w-2/3">
-          <WeeklyChart title="Last 7 Days Activity" data={data.weekHistory} />
+          <WeeklyChart title=" Weekly Activity" data={data.weekHistory} />
         </div>
         <MiniLeaderboard />
       </div>

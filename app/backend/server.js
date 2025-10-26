@@ -355,8 +355,8 @@ app.get("/api/history/year", verifyToken, async (req, res) => {
     const userRef = db.collection("users").doc(uid);
     const historyRef = userRef.collection("history");
 
-    // Get all history documents
-    const snapshot = await historyRef.orderBy("timestamp", "desc").get();
+    // Get all history documents (no orderBy needed since we'll sort by doc ID)
+    const snapshot = await historyRef.get();
 
     const history = [];
     snapshot.forEach((doc) => {
@@ -366,10 +366,12 @@ app.get("/api/history/year", verifyToken, async (req, res) => {
         promptCount: data.promptCount || 0,
         co2Total: data.co2Total || 0,
         outputTokens: data.outputTokens || 0,
-        timestamp: data.timestamp,
         modelBreakdown: data.modelBreakdown || {},
       });
     });
+
+    // Sort by date (document ID) in descending order
+    history.sort((a, b) => b.date.localeCompare(a.date));
 
     return res.json({
       success: true,
@@ -382,7 +384,7 @@ app.get("/api/history/year", verifyToken, async (req, res) => {
 });
 
 // ------------------ GET /api/history/range ------------------
-// Optional: Get history for a specific date range
+// Get history for a specific date range
 app.get("/api/history/range", verifyToken, async (req, res) => {
   const uid = req.user.uid;
   const { startDate, endDate } = req.query;
@@ -397,33 +399,28 @@ app.get("/api/history/range", verifyToken, async (req, res) => {
     const userRef = db.collection("users").doc(uid);
     const historyRef = userRef.collection("history");
 
-    // Query with date range
-    const snapshot = await historyRef
-      .where(
-        "timestamp",
-        ">=",
-        admin.firestore.Timestamp.fromDate(new Date(startDate))
-      )
-      .where(
-        "timestamp",
-        "<=",
-        admin.firestore.Timestamp.fromDate(new Date(endDate))
-      )
-      .orderBy("timestamp", "desc")
-      .get();
+    // Get all documents and filter by date string (document ID)
+    const snapshot = await historyRef.get();
 
     const history = [];
     snapshot.forEach((doc) => {
-      const data = doc.data();
-      history.push({
-        date: doc.id,
-        promptCount: data.promptCount || 0,
-        co2Total: data.co2Total || 0,
-        outputTokens: data.outputTokens || 0,
-        timestamp: data.timestamp,
-        modelBreakdown: data.modelBreakdown || {},
-      });
+      const dateId = doc.id; // YYYY-MM-DD format
+
+      // Filter by date range using string comparison (works with YYYY-MM-DD format)
+      if (dateId >= startDate && dateId <= endDate) {
+        const data = doc.data();
+        history.push({
+          date: dateId,
+          promptCount: data.promptCount || 0,
+          co2Total: data.co2Total || 0,
+          outputTokens: data.outputTokens || 0,
+          modelBreakdown: data.modelBreakdown || {},
+        });
+      }
     });
+
+    // Sort by date in descending order
+    history.sort((a, b) => b.date.localeCompare(a.date));
 
     return res.json({
       success: true,
