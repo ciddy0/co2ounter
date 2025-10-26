@@ -20,7 +20,7 @@ export default function Home() {
     switch (activeSection) {
       case "home":
         return (
-          <div className="flex flex-col md:flex-row items-center justify-center gap-x-52 px-4 md:space-x-4 space-y-6 md:space-y-0 max-w-5xl mx-auto my-auto">
+          <div className="flex flex-col md:flex-row items-center justify-center gap-x-52 px-[2rem] md:space-x-4 space-y-6 md:space-y-0 max-w-5xl mx-auto my-auto">
             {/* Left: Title and Slogan */}
             <div className="flex flex-col items-start text-left space-y-4 flex-1">
               <h1 className="text-4xl font-bold text-black dark:text-white">
@@ -38,7 +38,7 @@ export default function Home() {
             </div>
 
             {/* Right: Image */}
-            <div className="w-full md:w-auto rounded-md overflow-hidden flex items-center justify-center bg-gray-200 dark:bg-gray-800 flex-shrink-0">
+            <div className="w-full md:w-auto rounded-md overflow-hidden flex items-center justify-center flex-shrink-0">
               <Image
                 src="/preview.png"
                 alt="Preview"
