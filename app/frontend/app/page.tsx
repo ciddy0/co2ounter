@@ -110,10 +110,10 @@ export default function Home() {
       {/* Top Navigation */}
       <header className="flex items-center justify-between p-4">
         <div className="flex items-center gap-2">
-          <Image src="/happy.png" alt="Happy Cat" width={40} height={40} />
-          <h1 className="text-xl font-bold text-black dark:text-white">
+          <Image src="/happy.png" alt="Happy Cat" width={50} height={50} />
+          {/* <h1 className="text-xl font-bold text-black dark:text-white">
             co2ounter
-          </h1>
+          </h1> */}
         </div>
         <nav className="flex gap-6">
           <button
