@@ -20,23 +20,33 @@ export default function Home() {
     switch (activeSection) {
       case "home":
         return (
-          <div className="flex flex-col items-center justify-center flex-1 px-4 text-center space-y-6">
-            <h1 className="text-3xl mb-0 font-bold text-black dark:text-white">
-              co2ounter
-            </h1>
-            <h2 className="text-xl font-semibold text-[#BC9E9E]">
-              Track and reduce your AI carbon impact.
-            </h2>
-            <a
-              href="#"
-              className="px-8 py-3 bg-green-600 text-white font-semibold rounded hover:bg-green-700 transition"
-            >
-              Download
-            </a>
-            <div className="w-full max-w-md h-64 bg-gray-200 dark:bg-gray-800 rounded-md flex items-center justify-center">
-              <span className="text-gray-500 dark:text-gray-400">
-                Placeholder Image
-              </span>
+          <div className="flex flex-col md:flex-row items-center justify-center gap-x-52 px-4 md:space-x-4 space-y-6 md:space-y-0 max-w-5xl mx-auto my-auto">
+            {/* Left: Title and Slogan */}
+            <div className="flex flex-col items-start text-left space-y-4 flex-1">
+              <h1 className="text-4xl font-bold text-black dark:text-white">
+                co2ounter
+              </h1>
+              <h2 className="text-xl font-semibold text-[#BC9E9E]">
+                Track and reduce your AI carbon impact.
+              </h2>
+              <a
+                href="#"
+                className="px-8 py-3 bg-green-600 rounded text-white font-semibold hover:bg-green-700 transition"
+              >
+                Download
+              </a>
+            </div>
+
+            {/* Right: Image */}
+            <div className="w-full md:w-auto rounded-md overflow-hidden flex items-center justify-center bg-gray-200 dark:bg-gray-800 flex-shrink-0">
+              <Image
+                src="/preview.png"
+                alt="Preview"
+                width={299}
+                height={575}
+                style={{ width: "auto", height: "100%" }}
+                className="border-2 border-[#bae6fd] rounded"
+              />
             </div>
           </div>
         );
