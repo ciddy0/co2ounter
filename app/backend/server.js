@@ -1,4 +1,4 @@
-// app/backend/server.js
+// server.js - Fixed Firestore transaction ordering
 require("dotenv").config();
 const express = require("express");
 const bodyParser = require("body-parser");
@@ -10,6 +10,7 @@ const jwt = require("jsonwebtoken");
 const PORT = process.env.PORT || 4000;
 const app = express();
 
+// Updated CORS to allow Chrome extension
 const allowedOrigins = (
   process.env.CORS_ORIGINS || "http://localhost:3000"
 ).split(",");
@@ -18,9 +19,15 @@ app.use(
   cors({
     origin: (origin, callback) => {
       if (!origin) return callback(null, true);
-      if (allowedOrigins.indexOf(origin) !== -1) return callback(null, true);
+      if (origin.startsWith("chrome-extension://")) {
+        return callback(null, true);
+      }
+      if (allowedOrigins.indexOf(origin) !== -1) {
+        return callback(null, true);
+      }
       return callback(new Error("Not allowed by CORS"));
     },
+    credentials: true,
   })
 );
 app.use(bodyParser.json());
@@ -37,7 +44,6 @@ function todayKey(date = new Date()) {
 app.get("/health", (req, res) => res.json({ ok: true }));
 
 // ------------------ GET /api/stats ------------------
-// Returns today's stats and user info
 app.get("/api/stats", verifyToken, async (req, res) => {
   const uid = req.user.uid;
   const userRef = db.collection("users").doc(uid);
@@ -53,7 +59,6 @@ app.get("/api/stats", verifyToken, async (req, res) => {
     const userData = userDoc.data() || {};
     const todayData = todayDoc.data() || {};
 
-    // Check daily limits
     const exceeded = { prompts: false, co2: false };
     const dailyLimitPrompts = Number(userData.dailyLimitPrompts || 0);
     const dailyLimitCo2 = Number(userData.dailyLimitCo2 || 0);
@@ -105,7 +110,11 @@ app.post("/api/prompt", verifyToken, async (req, res) => {
 
   try {
     await db.runTransaction(async (tx) => {
+      // ⭐ ALL READS MUST COME FIRST ⭐
       const userSnap = await tx.get(userRef);
+      const historySnap = await tx.get(historyRef);
+
+      // NOW DO ALL WRITES
       if (!userSnap.exists) {
         tx.set(
           userRef,
@@ -134,21 +143,38 @@ app.post("/api/prompt", verifyToken, async (req, res) => {
         { merge: true }
       );
 
-      tx.set(
-        historyRef,
-        {
-          promptCount: FieldValue.increment(1),
-          co2Total: FieldValue.increment(Number(co2)),
-        },
-        { merge: true }
-      );
+      if (!historySnap.exists) {
+        tx.set(historyRef, {
+          promptCount: 1,
+          co2Total: Number(co2),
+          modelBreakdown: {
+            [model]: {
+              prompts: 1,
+              co2: Number(co2),
+            },
+          },
+        });
+      } else {
+        tx.set(
+          historyRef,
+          {
+            promptCount: FieldValue.increment(1),
+            co2Total: FieldValue.increment(Number(co2)),
+          },
+          { merge: true }
+        );
 
-      const mbPromptsPath = `modelBreakdown.${model}.prompts`;
-      const mbCo2Path = `modelBreakdown.${model}.co2`;
-      tx.update(historyRef, {
-        [mbPromptsPath]: FieldValue.increment(1),
-        [mbCo2Path]: FieldValue.increment(Number(co2)),
-      });
+        const mbPromptsPath = `modelBreakdown.${model}.prompts`;
+        const mbCo2Path = `modelBreakdown.${model}.co2`;
+        tx.set(
+          historyRef,
+          {
+            [mbPromptsPath]: FieldValue.increment(1),
+            [mbCo2Path]: FieldValue.increment(Number(co2)),
+          },
+          { merge: true }
+        );
+      }
     });
 
     const [userDoc, todayDoc] = await Promise.all([
@@ -200,7 +226,11 @@ app.post("/api/response", verifyToken, async (req, res) => {
 
   try {
     await db.runTransaction(async (tx) => {
+      // ⭐ ALL READS MUST COME FIRST ⭐
       const userSnap = await tx.get(userRef);
+      const historySnap = await tx.get(historyRef);
+
+      // NOW DO ALL WRITES
       if (!userSnap.exists) {
         tx.set(
           userRef,
@@ -230,21 +260,38 @@ app.post("/api/response", verifyToken, async (req, res) => {
         { merge: true }
       );
 
-      tx.set(
-        historyRef,
-        {
-          outputTokens: FieldValue.increment(Number(outputTokens)),
-          co2Total: FieldValue.increment(Number(co2)),
-        },
-        { merge: true }
-      );
+      if (!historySnap.exists) {
+        tx.set(historyRef, {
+          outputTokens: Number(outputTokens),
+          co2Total: Number(co2),
+          modelBreakdown: {
+            [model]: {
+              outputTokens: Number(outputTokens),
+              co2: Number(co2),
+            },
+          },
+        });
+      } else {
+        tx.set(
+          historyRef,
+          {
+            outputTokens: FieldValue.increment(Number(outputTokens)),
+            co2Total: FieldValue.increment(Number(co2)),
+          },
+          { merge: true }
+        );
 
-      const mbOutputPath = `modelBreakdown.${model}.outputTokens`;
-      const mbCo2Path = `modelBreakdown.${model}.co2`;
-      tx.update(historyRef, {
-        [mbOutputPath]: FieldValue.increment(Number(outputTokens)),
-        [mbCo2Path]: FieldValue.increment(Number(co2)),
-      });
+        const mbOutputPath = `modelBreakdown.${model}.outputTokens`;
+        const mbCo2Path = `modelBreakdown.${model}.co2`;
+        tx.set(
+          historyRef,
+          {
+            [mbOutputPath]: FieldValue.increment(Number(outputTokens)),
+            [mbCo2Path]: FieldValue.increment(Number(co2)),
+          },
+          { merge: true }
+        );
+      }
     });
 
     const [userDoc, todayDoc] = await Promise.all([
@@ -273,7 +320,7 @@ app.post("/api/response", verifyToken, async (req, res) => {
   }
 });
 
-// Leaderboard example (by promptTotal)
+// Leaderboard
 app.get("/leaderboard", async (req, res) => {
   try {
     const limit = Number(process.env.LEADERBOARD_LIMIT || 20);
@@ -300,6 +347,8 @@ app.get("/leaderboard", async (req, res) => {
     return res.status(500).json({ error: "Failed to fetch leaderboard" });
   }
 });
+
+// Extension token exchange endpoint
 app.post("/api/auth/extension-token", async (req, res) => {
   const { idToken } = req.body;
 
@@ -308,19 +357,22 @@ app.post("/api/auth/extension-token", async (req, res) => {
   }
 
   try {
-    // Verify Firebase ID token
     const decodedToken = await admin.auth().verifyIdToken(idToken);
     const uid = decodedToken.uid;
 
-    // Get user data from Firestore
     const userDoc = await db.collection("users").doc(uid).get();
     const userData = userDoc.data() || {};
 
-    // Generate custom 30-day JWT
+    if (!process.env.JWT_SECRET) {
+      console.error("❌ JWT_SECRET is not configured in .env file!");
+      return res.status(500).json({ error: "Server configuration error" });
+    }
+
     const customToken = jwt.sign(
       {
         uid,
         email: decodedToken.email,
+        type: "extension",
       },
       process.env.JWT_SECRET,
       { expiresIn: "30d" }

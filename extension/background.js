@@ -1,10 +1,8 @@
-// Global State
+// background.js - Updated to sync with Firebase only
 let firebaseToken = null;
-let promptCount = 0;
-let totalInputTokens = 0;
-let totalOutputTokens = 0;
-let totalCO2 = 0; // grams
 let isLoggedIn = false;
+
+const BACKEND_URL = "http://localhost:4000";
 
 // Carbon calculation constants
 const MODEL_PARAMS = {
@@ -27,74 +25,23 @@ function calculateCarbon(model, tokens) {
   return carbonKg * 1000; // grams
 }
 
-// Increment stats + update badge + notify popup
-function incrementStats({ inputTokens = 0, outputTokens = 0, co2 = 0 }) {
-  if (inputTokens) {
-    promptCount++;
-    totalInputTokens += inputTokens;
-  }
-  if (outputTokens) {
-    totalOutputTokens += outputTokens;
-  }
-  if (co2) {
-    totalCO2 += co2;
-  }
-
-  // Save to local storage
-  chrome.storage.local.set(
-    { promptCount, totalInputTokens, totalOutputTokens, totalCO2 },
-    () => {
-      console.log("💾 Stats saved", {
-        promptCount,
-        totalInputTokens,
-        totalOutputTokens,
-        totalCO2,
-      });
-    }
-  );
-
-  // Update badge
-  chrome.action.setBadgeText({ text: promptCount.toString() });
-  chrome.action.setBadgeBackgroundColor({ color: "#4caf50" });
-
-  // Notify popup
-  chrome.runtime.sendMessage({
-    type: "STATS_UPDATED",
-    stats: { promptCount, totalInputTokens, totalOutputTokens, totalCO2 },
-  });
-}
-
-// Load Firebase token and local stats on startup
+// Load Firebase token on startup
 chrome.storage.sync.get({ firebaseToken: null }, (data) => {
   firebaseToken = data.firebaseToken;
+  isLoggedIn = !!firebaseToken;
   console.log("🔑 Loaded Firebase token:", firebaseToken ? "YES" : "NO");
+  updatePopup();
+  updateBadgeFromFirebase(); // Load initial badge count
 });
-
-chrome.storage.local.get(
-  { promptCount: 0, totalInputTokens: 0, totalOutputTokens: 0, totalCO2: 0 },
-  (data) => {
-    promptCount = data.promptCount;
-    totalInputTokens = data.totalInputTokens;
-    totalOutputTokens = data.totalOutputTokens;
-    totalCO2 = data.totalCO2;
-    chrome.action.setBadgeText({ text: promptCount.toString() });
-    console.log("📊 Loaded stats:", {
-      promptCount,
-      totalInputTokens,
-      totalOutputTokens,
-      totalCO2,
-    });
-  }
-);
 
 // Backend sync helper
 async function syncWithBackend(endpoint, body) {
   if (!firebaseToken) {
     console.warn("⚠️ No Firebase token, skipping backend sync");
-    return;
+    return null;
   }
   try {
-    const res = await fetch("http://localhost:4000" + endpoint, {
+    const res = await fetch(BACKEND_URL + endpoint, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -107,7 +54,52 @@ async function syncWithBackend(endpoint, body) {
     return json;
   } catch (err) {
     console.error("❌ Backend sync failed:", err);
+    return null;
   }
+}
+
+// Fetch stats from backend
+async function fetchStatsFromBackend() {
+  if (!firebaseToken) {
+    return null;
+  }
+  try {
+    const res = await fetch(`${BACKEND_URL}/api/stats`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${firebaseToken}`,
+      },
+    });
+    const json = await res.json();
+    return json;
+  } catch (err) {
+    console.error("❌ Failed to fetch stats:", err);
+    return null;
+  }
+}
+
+// Update badge from Firebase data
+async function updateBadgeFromFirebase() {
+  const stats = await fetchStatsFromBackend();
+  if (stats && stats.success) {
+    const count = stats.today.promptCount || 0;
+    chrome.action.setBadgeText({ text: count.toString() });
+    chrome.action.setBadgeBackgroundColor({ color: "#4caf50" });
+    console.log("🔖 Badge updated:", count);
+  }
+}
+
+// Notify popup to refresh
+function notifyPopup() {
+  chrome.runtime
+    .sendMessage({
+      type: "STATS_UPDATED",
+    })
+    .catch(() => {
+      // Popup might not be open, that's ok
+      console.log("Popup not open, skipping notification");
+    });
 }
 
 // Main message handler
@@ -120,28 +112,36 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     chrome.storage.sync.set({ firebaseToken }, () => {
       console.log("✅ Stored Firebase token in chrome.storage");
       updatePopup();
+      updateBadgeFromFirebase();
       sendResponse({ success: true });
     });
     return true; // async sendResponse
   }
-  // Add a new message type for logout
+
   if (message.type === "LOGOUT") {
     firebaseToken = null;
     isLoggedIn = false;
     chrome.storage.sync.remove("firebaseToken", () => {
       console.log("🚪 Logged out, token removed");
-      updatePopup(); // Update popup after logout
+      chrome.action.setBadgeText({ text: "" }); // Clear badge
+      updatePopup();
       sendResponse({ success: true });
     });
     return true;
   }
 
   if (message.type === "PROMPT_SENT") {
-    incrementStats({ inputTokens: message.inputTokens });
+    const co2 = calculateCarbon(
+      message.model || "chatgpt",
+      message.inputTokens || 0
+    );
     syncWithBackend("/api/prompt", {
       model: message.model || "chatgpt",
-      inputTokens: message.inputTokens,
-      co2: message.co2 || 0,
+      inputTokens: message.inputTokens || 0,
+      co2: co2,
+    }).then(() => {
+      updateBadgeFromFirebase();
+      notifyPopup();
     });
     sendResponse({ received: true });
     return true;
@@ -149,39 +149,60 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
   if (message.type === "RESPONSE_TOKENS") {
     const co2 = calculateCarbon(message.model, message.tokens);
-    incrementStats({ outputTokens: message.tokens, co2 });
     syncWithBackend("/api/response", {
       model: message.model || "chatgpt",
       outputTokens: message.tokens,
       co2,
+    }).then(() => {
+      notifyPopup();
     });
     sendResponse({ received: true });
     return true;
   }
 
   if (message.type === "GET_STATS") {
-    sendResponse({
-      promptCount,
-      totalInputTokens,
-      totalOutputTokens,
-      totalCO2,
+    // Return Firebase stats instead of local
+    fetchStatsFromBackend().then((data) => {
+      if (data && data.success) {
+        sendResponse({
+          promptCount: data.today.promptCount || 0,
+          totalInputTokens: 0, // Not tracked separately in today's data
+          totalOutputTokens: data.today.outputTokens || 0,
+          totalCO2: data.today.co2Total || 0,
+        });
+      } else {
+        sendResponse({
+          promptCount: 0,
+          totalInputTokens: 0,
+          totalOutputTokens: 0,
+          totalCO2: 0,
+        });
+      }
     });
     return true;
   }
 
   if (message.type === "RESET_STATS") {
-    promptCount = totalInputTokens = totalOutputTokens = totalCO2 = 0;
-    incrementStats({}); // triggers badge + storage + popup
-    sendResponse({ success: true });
+    // Note: Backend doesn't have a reset endpoint
+    // You could implement one or just refresh the display
+    console.log("⚠️ Reset not implemented on backend");
+    sendResponse({ success: false, error: "Reset not available" });
     return true;
   }
 
   return false;
 });
 
-// function to update popup based on auth state
+// Update popup based on auth state
 function updatePopup() {
   const popupPath = isLoggedIn ? "content-popup.html" : "welcome-popup.html";
   chrome.action.setPopup({ popup: popupPath });
   console.log("🔄 Popup updated to:", popupPath);
 }
+
+// Refresh badge periodically (every 5 minutes)
+setInterval(() => {
+  if (isLoggedIn) {
+    updateBadgeFromFirebase();
+  }
+}, 5 * 60 * 1000);
