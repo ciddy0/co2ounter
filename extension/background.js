@@ -87,7 +87,7 @@ async function updateBadgeFromFirebase() {
   if (stats && stats.success) {
     const count = stats.today.promptCount || 0;
     chrome.action.setBadgeText({ text: count.toString() });
-    chrome.action.setBadgeBackgroundColor({ color: "#4caf50" });
+    chrome.action.setBadgeBackgroundColor({ color: "#D22B2B" });
     console.log("🔖 Badge updated:", count);
   } else {
     // Clear badge if no stats available
