@@ -1,10 +1,19 @@
-// app/frontend/pages/login.js
+// app/frontend/login.js
 "use client";
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { initializeApp } from "firebase/app";
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
+import {
+  Card,
+  // CardAction,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -20,8 +29,10 @@ export default function LoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const handleLogin = async () => {
+  const handleLogin = async (e) => {
+    e.preventDefault();
     setLoading(true);
     try {
       const userCredential = await signInWithEmailAndPassword(
@@ -48,40 +59,45 @@ export default function LoginPage() {
   };
 
   return (
-    // <div style={{ padding: 20 }}>
-    //   <h1>Login to your account</h1>
-    //   <form onSubmit={handleLogin}>
-    //     <div>
-    //       <input
-    //         value={email}
-    //         onChange={(e) => setEmail(e.target.value)}
-    //         placeholder="email"
-    //       />
-    //     </div>
-    //     <div>
-    //       <input
-    //         type="password"
-    //         value={password}
-    //         onChange={(e) => setPassword(e.target.value)}
-    //         placeholder="password"
-    //       />
-    //     </div>
-    //     <button type="submit">Sign in</button>
-    //   </form>
-    // </div>
-
-    <Card>
-      <CardHeader>
-        <CardTitle>Card Title</CardTitle>
-        <CardDescription>Card Description</CardDescription>
-        <CardAction>Card Action</CardAction>
-      </CardHeader>
-      <CardContent>
-        <p>Card Content</p>
-      </CardContent>
-      <CardFooter>
-        <p>Card Footer</p>
-      </CardFooter>
-    </Card>
+    <div className="flex items-center justify-center min-h-screen">
+      <Card className="w-1/2 max-w-md gap-4 border-[0.5px] border-gray-500">
+        <CardHeader>
+          <CardTitle>Login to your account</CardTitle>
+          <CardDescription>Enter your information to sign in</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleLogin} className="space-y-5 ">
+            <div className="space-y-2">
+              <div>Email</div>
+              <input
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder=""
+                className="w-full h-10 p-3 bg-[#212121] border-[0.5px] border-gray-500 rounded-md "
+              />
+            </div>
+            <div className="space-y-2">
+              <div>Password</div>
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder=""
+                className="w-full h-10 p-3 bg-[#212121] border-[0.5px] border-gray-500 rounded-md "
+              />
+            </div>
+            <button
+              type="submit"
+              className="mt-2 w-full h-10 bg-white text-black rounded-md p-1"
+            >
+              Login
+            </button>
+          </form>
+        </CardContent>
+        {/* <CardFooter>
+          <p>Card Footer</p>
+        </CardFooter> */}
+      </Card>
+    </div>
   );
 }
