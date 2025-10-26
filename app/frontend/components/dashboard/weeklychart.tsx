@@ -45,11 +45,17 @@ const WeeklyChart = ({
       if (!item.date) return false;
       const itemDate = new Date(item.date);
       itemDate.setHours(0, 0, 0, 0);
-      
+
       const matches = itemDate.getTime() === date.getTime();
-      
-      console.log(`Comparing ${dayNames[i]} - Expected: ${date.toDateString()}, Item: ${itemDate.toDateString()}, Match: ${matches}, Count: ${item.count}`);
-      
+
+      console.log(
+        `Comparing ${
+          dayNames[i]
+        } - Expected: ${date.toDateString()}, Item: ${itemDate.toDateString()}, Match: ${matches}, Count: ${
+          item.count
+        }`
+      );
+
       return matches;
     });
 
