@@ -22,6 +22,7 @@ const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 };
 
+// Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
@@ -32,8 +33,9 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
 
   const handleLogin = async (e) => {
-    e.preventDefault();
+    e.preventDefault(); // Prevent form from reloading the page
     setLoading(true);
+
     try {
       const userCredential = await signInWithEmailAndPassword(
         auth,
@@ -43,10 +45,15 @@ export default function LoginPage() {
       const user = userCredential.user;
       const token = await user.getIdToken();
 
-      // Store token in chrome.storage.sync for extension
-      chrome.storage.sync.set({ firebaseToken: token }, () => {
-        console.log("✅ Firebase token stored in chrome.storage.sync");
-      });
+      // Store token for Chrome extension or fallback to localStorage
+      if (typeof chrome !== "undefined" && chrome.storage?.sync) {
+        chrome.storage.sync.set({ firebaseToken: token }, () => {
+          console.log("✅ Firebase token stored in chrome.storage.sync");
+        });
+      } else {
+        localStorage.setItem("firebaseToken", token);
+        console.log("✅ Firebase token stored in localStorage");
+      }
 
       // Navigate to home page
       router.push("/");
