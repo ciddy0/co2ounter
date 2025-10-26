@@ -26,7 +26,7 @@ export default function Home() {
               <h1 className="text-4xl font-bold text-black dark:text-white">
                 co2ounter
               </h1>
-              <h2 className="text-xl font-semibold text-[#BC9E9E]">
+              <h2 className="text-xl font-semibold text-gray-400">
                 Track and reduce your AI carbon impact.
               </h2>
               <a
