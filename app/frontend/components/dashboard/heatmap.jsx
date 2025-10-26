@@ -18,10 +18,12 @@ const Heatmap = ({ data }) => {
     const completeValues = [];
 
     // Create a map from the data prop
-    const dataMap = new Map();
+    const dataMap = new Map(); // ✅ FIXED: Declare the Map
+    
     if (data && Array.isArray(data)) {
       data.forEach((item) => {
-        const dateKey = `${item.date.getUTCFullYear()}-${item.date.getUTCMonth()}-${item.date.getUTCDate()}`;
+        // ✅ FIXED: Use getUTCMonth() + 1 for correct month
+        const dateKey = `${item.date.getUTCFullYear()}-${item.date.getUTCMonth() + 1}-${item.date.getUTCDate()}`;
         dataMap.set(dateKey, item.count);
       });
     }
@@ -29,7 +31,7 @@ const Heatmap = ({ data }) => {
     // Fill in all dates for the past year
     const currentDate = new Date(startDate);
     while (currentDate <= endDate) {
-      const dateKey = `${currentDate.getUTCFullYear()}-${currentDate.getUTCMonth()}-${currentDate.getUTCDate()}`;
+      const dateKey = `${currentDate.getUTCFullYear()}-${currentDate.getUTCMonth() + 1}-${currentDate.getUTCDate()}`;
       completeValues.push({
         date: new Date(currentDate),
         count: dataMap.get(dateKey) || 0,
@@ -49,10 +51,9 @@ const Heatmap = ({ data }) => {
       : 0;
 
   // Calculate max count for scaling
-  const maxCount =
-    data && Array.isArray(data)
-      ? Math.max(...data.map((d) => d.count), 1) // Minimum of 1 to avoid division by zero
-      : 1;
+  const maxCount = data && Array.isArray(data) && data.length > 0
+    ? Math.max(...data.map((d) => d.count), 1) // Minimum of 1 to avoid division by zero
+    : 1;
 
   return (
     <div className="flex flex-col gap-4 p-6 bg-white rounded-3xl h-full">
@@ -69,8 +70,7 @@ const Heatmap = ({ data }) => {
               return "color-empty";
             }
 
-            // Use the maxCount calculated above
-
+            // ✅ FIXED: Use maxCount from the outer scope instead of undefined databaseValues
             let level;
             if (value.count >= maxCount * 0.8) level = 5;
             else if (value.count >= maxCount * 0.6) level = 4;
