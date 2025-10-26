@@ -289,9 +289,9 @@ export default function Dashboard() {
           increment={parseFloat(co2Increment.toFixed(2))}
         />
         <CO2Card
-          number={parseFloat(((data.user.co2Total || 0) / 1000).toFixed(4))}
-          title="Total CO2"
-          increment={parseFloat((dailyCo2Avg / 1000).toFixed(4))}
+          number={parseFloat((data.user.co2Total || 0).toFixed(2))}
+          title="Total CO2 (g)"
+          increment={parseFloat(dailyCo2Avg.toFixed(2))}
         />
       </div>
 

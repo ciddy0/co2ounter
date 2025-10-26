@@ -21,7 +21,7 @@ const CO2Card = ({
               <EqualApproximately className="text-gray-500 w-4 h-4" />
               <h3 className="text-sm font-semibold">{Math.abs(increment)}</h3>
             </div>
-            <span className="text-sm ">kg/day</span>
+            <span className="text-sm ">g/day</span>
           </>
         ) : (
           <>
@@ -29,7 +29,7 @@ const CO2Card = ({
               <EqualApproximately className="text-gray-500 w-4 h-4" />
               <h3 className="text-sm font-semibold">{Math.abs(increment)}</h3>
             </div>
-            <span className="text-sm">kg/day</span>
+            <span className="text-sm">g/day</span>
           </>
         )}
       </div>
