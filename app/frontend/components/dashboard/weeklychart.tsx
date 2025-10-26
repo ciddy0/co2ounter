@@ -40,7 +40,6 @@ const WeeklyChart = ({
     date.setDate(startOfWeek.getDate() + i);
     date.setHours(0, 0, 0, 0);
 
-    // Find data for this date
     const dayData = data.find((item) => {
       if (!item.date) return false;
       const itemDate = new Date(item.date);
