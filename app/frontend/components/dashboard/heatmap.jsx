@@ -3,7 +3,7 @@ import CalendarHeatmap from "react-calendar-heatmap";
 import { Tooltip } from "react-tooltip";
 import "./heatmap.css";
 
-const Heatmap = ({ data }) => {
+const Heatmap = ({ data, totalPrompts = 0 }) => {
   const today = new Date();
 
   const shiftDate = (date, days) => {
@@ -18,11 +18,10 @@ const Heatmap = ({ data }) => {
     const completeValues = [];
 
     // Create a map from the data prop
-    const dataMap = new Map(); // ✅ FIXED: Declare the Map
+    const dataMap = new Map();
     
     if (data && Array.isArray(data)) {
       data.forEach((item) => {
-        // ✅ FIXED: Use getUTCMonth() + 1 for correct month
         const dateKey = `${item.date.getUTCFullYear()}-${item.date.getUTCMonth() + 1}-${item.date.getUTCDate()}`;
         dataMap.set(dateKey, item.count);
       });
@@ -44,15 +43,9 @@ const Heatmap = ({ data }) => {
 
   const values = generateCompleteValues();
 
-  // Calculate total prompts from the data prop
-  const totalPrompts =
-    data && Array.isArray(data)
-      ? data.reduce((sum, item) => sum + item.count, 0)
-      : 0;
-
   // Calculate max count for scaling
   const maxCount = data && Array.isArray(data) && data.length > 0
-    ? Math.max(...data.map((d) => d.count), 1) // Minimum of 1 to avoid division by zero
+    ? Math.max(...data.map((d) => d.count), 1)
     : 1;
 
   return (
@@ -70,7 +63,6 @@ const Heatmap = ({ data }) => {
               return "color-empty";
             }
 
-            // ✅ FIXED: Use maxCount from the outer scope instead of undefined databaseValues
             let level;
             if (value.count >= maxCount * 0.8) level = 5;
             else if (value.count >= maxCount * 0.6) level = 4;

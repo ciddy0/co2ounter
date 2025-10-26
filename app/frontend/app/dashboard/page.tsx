@@ -305,7 +305,7 @@ export default function Dashboard() {
 
       {/* Heatmap */}
       <div className="mb-4">
-        <Heatmap data={data.yearHistory} />
+        <Heatmap data={data.yearHistory}totalPrompts={data.user.promptTotal}  />
       </div>
     </div>
   );
