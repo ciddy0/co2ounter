@@ -396,3 +396,37 @@ app.post("/api/auth/extension-token", async (req, res) => {
 app.listen(PORT, () => {
   console.log(`Backend listening on port ${PORT}`);
 });
+
+// ------------------ /api/limits ------------------
+app.post("/api/limits", verifyToken, async (req, res) => {
+  const uid = req.user.uid;
+  const { dailyLimitPrompts, dailyLimitCo2 } = req.body;
+
+  if (
+    (dailyLimitPrompts && dailyLimitPrompts < 0) ||
+    (dailyLimitCo2 && dailyLimitCo2 < 0)
+  ) {
+    return res.status(400).json({ error: "Limits must be positive numbers" });
+  }
+
+  try {
+    const userRef = db.collection("users").doc(uid);
+
+    await userRef.set(
+      {
+        dailyLimitPrompts: Number(dailyLimitPrompts) || 0,
+        dailyLimitCo2: Number(dailyLimitCo2) || 0,
+      },
+      { merge: true }
+    );
+
+    const updated = await userRef.get();
+    return res.json({
+      success: true,
+      user: updated.data(),
+    });
+  } catch (err) {
+    console.error("/api/limits error:", err);
+    return res.status(500).json({ error: "Failed to update limits" });
+  }
+});

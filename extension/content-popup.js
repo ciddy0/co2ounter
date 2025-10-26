@@ -87,33 +87,42 @@ document.addEventListener("DOMContentLoaded", async () => {
       promptMsgEl.innerText = displayPromptCount.toLocaleString();
     }
 
-    // Update message based on prompt count
     if (promptMessageEl) {
       const count = displayPromptCount;
-      if (count === 0) {
-        promptMessageEl.innerText = " today. Let's get started!";
-      } else if (count < 10) {
-        promptMessageEl.innerText = " today. Looking good!";
-      } else if (count < 50) {
-        promptMessageEl.innerText = " today. Keep it up!";
-      } else {
-        promptMessageEl.innerText = " today. Let's tone it down!";
-      }
+      if (count === 0) promptMessageEl.innerText = " today. Let's get started!";
+      else if (count < 10) promptMessageEl.innerText = " today. Looking good!";
+      else if (count < 50) promptMessageEl.innerText = " today. Keep it up!";
+      else promptMessageEl.innerText = " today. Let's tone it down!";
     }
 
-    // Reset colors first
+    // Reset colors
     if (promptCountEl) promptCountEl.style.color = "";
     if (co2CountEl) co2CountEl.style.color = "";
 
-    // Show visual feedback for exceeded limits
+    // Update daily limits inside the text container only
+    const limitsText = document.getElementById("limitsText");
+
+    if (limitsText) {
+      limitsText.innerHTML = `
+      <div id="promptLimitLine">
+        <strong>Daily Prompt Limit:</strong> ${
+          user.dailyLimitPrompts || "∞"
+        }<br>
+      </div>
+      <div id="co2LimitLine" style="margin-top:6px;">
+        <strong>Daily CO₂ Limit:</strong> ${
+          user.dailyLimitCo2?.toFixed?.(2) || "∞"
+        }g<br>
+      </div>
+    `;
+    }
+
+    // Highlight if exceeded
     if (exceeded.prompts || exceeded.co2) {
       console.warn("⚠️ Daily limit exceeded:", exceeded);
-      if (exceeded.prompts && promptCountEl) {
+      if (exceeded.prompts && promptCountEl)
         promptCountEl.style.color = "#ff6b6b";
-      }
-      if (exceeded.co2 && co2CountEl) {
-        co2CountEl.style.color = "#ff6b6b";
-      }
+      if (exceeded.co2 && co2CountEl) co2CountEl.style.color = "#ff6b6b";
     }
   }
 
@@ -159,6 +168,75 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (message.type === "STATS_UPDATED") {
       console.log("🔄 Stats updated, refreshing...");
       fetchStats(); // Re-fetch from Firebase
+    }
+  });
+
+  const editLimitsBtn = document.getElementById("editLimitsBtn");
+  const modal = document.getElementById("editLimitsModal");
+  const modalPromptInput = document.getElementById("modalPromptLimit");
+  const modalCo2Input = document.getElementById("modalCo2Limit");
+  const modalCancelBtn = document.getElementById("modalCancelBtn");
+  const modalSaveBtn = document.getElementById("modalSaveBtn");
+
+  if (editLimitsBtn) {
+    editLimitsBtn.addEventListener("click", async () => {
+      const token = await getToken();
+      if (!token) return alert("Please log in first.");
+
+      // Pre-fill modal with current limits
+      const response = await fetch(`${BACKEND_URL}/api/stats`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      const data = await response.json();
+      if (data.success) {
+        modalPromptInput.value = data.user.dailyLimitPrompts || "";
+        modalCo2Input.value = data.user.dailyLimitCo2 || "";
+      }
+
+      modal.style.display = "flex"; // show modal
+    });
+  }
+
+  // Cancel button
+  modalCancelBtn.addEventListener("click", () => {
+    modal.style.display = "none";
+  });
+
+  // Save button
+  modalSaveBtn.addEventListener("click", async () => {
+    const token = await getToken();
+    if (!token) return alert("Please log in first.");
+
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/limits`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          dailyLimitPrompts: modalPromptInput.value
+            ? Number(modalPromptInput.value)
+            : 0,
+          dailyLimitCo2: modalCo2Input.value ? Number(modalCo2Input.value) : 0,
+        }),
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        alert("✅ Daily limits updated successfully!");
+        fetchStats(); // refresh UI
+        modal.style.display = "none";
+      } else {
+        alert("❌ Failed to update limits: " + (data.error || "Unknown error"));
+      }
+    } catch (err) {
+      console.error("❌ Failed to set limits:", err);
+      alert("Error updating limits");
     }
   });
 
