@@ -164,26 +164,21 @@ export default function Dashboard() {
     return last7Days;
   };
 
-  const getYesterdayData = (history: any[]) => {
-    const yesterday = new Date();
-    yesterday.setDate(yesterday.getDate() - 1);
-    yesterday.setHours(0, 0, 0, 0);
+const getYesterdayData = (history: any[]) => {
+  const yesterday = new Date();
+  yesterday.setDate(yesterday.getDate() - 1);
+  const yesterdayKey = yesterday.toISOString().split("T")[0]; // Format as YYYY-MM-DD
 
-    const yesterdayEntry = history.find((entry: any) => {
-      const entryDate = entry.date
-        ? new Date(entry.date)
-        : new Date(entry.timestamp?.toDate?.() || entry.timestamp);
-      return entryDate.toDateString() === yesterday.toDateString();
-    });
+  const yesterdayEntry = history.find((entry: any) => entry.date === yesterdayKey);
 
-    return yesterdayEntry
-      ? {
-          promptCount: yesterdayEntry.promptCount || 0,
-          co2Total: yesterdayEntry.co2Total || 0,
-          outputTokens: yesterdayEntry.outputTokens || 0,
-        }
-      : { promptCount: 0, co2Total: 0, outputTokens: 0 };
-  };
+  return yesterdayEntry
+    ? {
+        promptCount: yesterdayEntry.promptCount || 0,
+        co2Total: yesterdayEntry.co2Total || 0,
+        outputTokens: yesterdayEntry.outputTokens || 0,
+      }
+    : { promptCount: 0, co2Total: 0, outputTokens: 0 };
+};
 
   const calculateDailyAverage = (total: number): number => {
     const today = new Date();
@@ -220,7 +215,7 @@ export default function Dashboard() {
   }
 
   const promptIncrement =
-    data.today.promptCount - (data.yesterday?.promptCount || 0);
+  data.today.promptCount - (data.yesterday?.promptCount || 0);
   const co2Increment = data.today.co2Total - (data.yesterday?.co2Total || 0);
   const dailyPromptsAvg = calculateDailyAverage(data.user.promptTotal);
   const dailyCo2Avg = calculateDailyAverage(data.user.co2Total);
