@@ -6,6 +6,18 @@ document.addEventListener("DOMContentLoaded", () => {
   const totalEl = document.getElementById("totalTokens");
   const co2El = document.getElementById("co2");
 
+  // Login/Register buttons
+  const loginBtn = document.querySelectorAll(".entry-button")[0];
+  const registerBtn = document.querySelectorAll(".entry-button")[1];
+
+  loginBtn.addEventListener("click", () => {
+    chrome.tabs.create({ url: "http://localhost:3000/login" });
+  });
+
+  registerBtn.addEventListener("click", () => {
+    chrome.tabs.create({ url: "http://localhost:3000/register" });
+  });
+
   function updateStats(stats) {
     if (countEl) countEl.innerText = (stats.promptCount || 0).toLocaleString();
     if (inputEl)
