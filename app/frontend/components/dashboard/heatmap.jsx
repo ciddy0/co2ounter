@@ -19,13 +19,13 @@ const Heatmap = () => {
 
     const dataMap = new Map();
     databaseValues.forEach((item) => {
-      const dateKey = item.date.toDateString();
+      const dateKey = `${item.date.getUTCFullYear()}-${item.date.getUTCMonth()}-${item.date.getUTCDate()}`;
       dataMap.set(dateKey, item.count);
     });
 
     const currentDate = new Date(startDate);
     while (currentDate <= endDate) {
-      const dateKey = currentDate.toDateString();
+      const dateKey = `${currentDate.getUTCFullYear()}-${currentDate.getUTCMonth()}-${currentDate.getUTCDate()}`;
       completeValues.push({
         date: new Date(currentDate),
         count: dataMap.get(dateKey) || 0,
@@ -57,16 +57,14 @@ const Heatmap = () => {
               return "color-empty";
             }
 
-            // Scale the count to 1-4 range based on your data
             const maxCount = Math.max(...databaseValues.map((d) => d.count));
 
-            // Map count to 1-5 scale (better granularity)
             let level;
-            if (value.count >= maxCount * 0.8) level = 5; // Darkest
-            else if (value.count >= maxCount * 0.6) level = 4; // Very dark
-            else if (value.count >= maxCount * 0.4) level = 3; // Medium
-            else if (value.count >= maxCount * 0.2) level = 2; // Light
-            else level = 1; // Very light
+            if (value.count >= maxCount * 0.8) level = 5;
+            else if (value.count >= maxCount * 0.6) level = 4;
+            else if (value.count >= maxCount * 0.4) level = 3;
+            else if (value.count >= maxCount * 0.2) level = 2;
+            else level = 1;
 
             return `color-${level}`;
           }}

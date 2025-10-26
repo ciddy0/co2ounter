@@ -36,11 +36,14 @@ const WeeklyChart = ({
     const date = new Date(startOfWeek);
     date.setDate(startOfWeek.getDate() + i);
 
-    // Find data for this date
     const dayData = data.find((item) => {
       if (!item.date) return false;
       const itemDate = new Date(item.date);
-      return itemDate.toDateString() === date.toDateString();
+      return (
+        itemDate.getUTCFullYear() === date.getUTCFullYear() &&
+        itemDate.getUTCMonth() === date.getUTCMonth() &&
+        itemDate.getUTCDate() === date.getUTCDate()
+      );
     });
 
     chartData.push({
