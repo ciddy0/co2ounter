@@ -5,7 +5,7 @@ import "./heatmap.css";
 
 const Heatmap = ({ data }) => {
   const today = new Date();
-  
+
   const shiftDate = (date, days) => {
     const newDate = new Date(date);
     newDate.setDate(newDate.getDate() + days);
@@ -16,7 +16,7 @@ const Heatmap = ({ data }) => {
     const startDate = shiftDate(today, -364);
     const endDate = today;
     const completeValues = [];
-    
+
     // Create a map from the data prop
     const dataMap = new Map(); // ✅ FIXED: Declare the Map
     
@@ -43,11 +43,12 @@ const Heatmap = ({ data }) => {
   };
 
   const values = generateCompleteValues();
-  
+
   // Calculate total prompts from the data prop
-  const totalPrompts = data && Array.isArray(data) 
-    ? data.reduce((sum, item) => sum + item.count, 0)
-    : 0;
+  const totalPrompts =
+    data && Array.isArray(data)
+      ? data.reduce((sum, item) => sum + item.count, 0)
+      : 0;
 
   // Calculate max count for scaling
   const maxCount = data && Array.isArray(data) && data.length > 0
@@ -94,7 +95,9 @@ const Heatmap = ({ data }) => {
             }
             return {
               "data-tooltip-id": "heatmap-tooltip",
-              "data-tooltip-content": `${value.count} prompts on ${value.date.toDateString()}`,
+              "data-tooltip-content": `${
+                value.count
+              } prompts on ${value.date.toDateString()}`,
             };
           }}
           showMonthLabels

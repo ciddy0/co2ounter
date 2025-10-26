@@ -8,20 +8,8 @@ import PromptCard from "../../components/dashboard/promptcard";
 import WeeklyChart from "../../components/dashboard/weeklychart";
 import MiniLeaderboard from "../../components/dashboard/mini-leaderboard";
 import Heatmap from "../../components/dashboard/heatmap";
-
-interface HistoryEntry {
-  co2Total: number;
-  promptCount: number;
-  outputTokens: number;
-  timestamp: any;
-  modelBreakdown?: {
-    [key: string]: {
-      co2: number;
-      prompts: number;
-      outputTokens: number;
-    };
-  };
-}
+import Offset from "@/components/dashboard/offset";
+import { Button } from "@/components/ui/button";
 
 interface DashboardData {
   user: {
@@ -129,14 +117,20 @@ export default function Dashboard() {
     }
   };
 
-  const processYearHistory = (history: any[]): Array<{ date: Date; count: number }> => {
+  const processYearHistory = (
+    history: any[]
+  ): Array<{ date: Date; count: number }> => {
     return history.map((entry: any) => ({
-      date: entry.date ? new Date(entry.date) : new Date(entry.timestamp?.toDate?.() || entry.timestamp),
+      date: entry.date
+        ? new Date(entry.date)
+        : new Date(entry.timestamp?.toDate?.() || entry.timestamp),
       count: entry.promptCount || 0,
     }));
   };
 
-  const getLast7Days = (history: any[]): Array<{ date: Date; count: number }> => {
+  const getLast7Days = (
+    history: any[]
+  ): Array<{ date: Date; count: number }> => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
@@ -155,9 +149,9 @@ export default function Dashboard() {
     for (let i = 6; i >= 0; i--) {
       const date = new Date(today);
       date.setDate(today.getDate() - i);
-      
+
       // Format date as YYYY-MM-DD to match document IDs
-      const dateKey = date.toISOString().split('T')[0];
+      const dateKey = date.toISOString().split("T")[0];
       const dayEntry = historyMap.get(dateKey);
 
       last7Days.push({
@@ -176,7 +170,9 @@ export default function Dashboard() {
     yesterday.setHours(0, 0, 0, 0);
 
     const yesterdayEntry = history.find((entry: any) => {
-      const entryDate = entry.date ? new Date(entry.date) : new Date(entry.timestamp?.toDate?.() || entry.timestamp);
+      const entryDate = entry.date
+        ? new Date(entry.date)
+        : new Date(entry.timestamp?.toDate?.() || entry.timestamp);
       return entryDate.toDateString() === yesterday.toDateString();
     });
 
@@ -200,7 +196,7 @@ export default function Dashboard() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-gray-50">
+      <div className="flex items-center justify-center min-h-screen">
         <div className="text-lg">Loading dashboard...</div>
       </div>
     );
@@ -208,7 +204,7 @@ export default function Dashboard() {
 
   if (error || !data) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-gray-50">
+      <div className="flex items-center justify-center min-h-screen">
         <div className="bg-white p-6 rounded-lg shadow-lg">
           <h2 className="text-xl font-bold text-red-600 mb-4">Error</h2>
           <p>{error || "Failed to load dashboard data"}</p>
@@ -223,41 +219,48 @@ export default function Dashboard() {
     );
   }
 
-  const promptIncrement = data.today.promptCount - (data.yesterday?.promptCount || 0);
+  const promptIncrement =
+    data.today.promptCount - (data.yesterday?.promptCount || 0);
   const co2Increment = data.today.co2Total - (data.yesterday?.co2Total || 0);
   const dailyPromptsAvg = calculateDailyAverage(data.user.promptTotal);
   const dailyCo2Avg = calculateDailyAverage(data.user.co2Total);
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+    <div className="container mx-auto py-12 space-y-8">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">
+          <h1 className="text-3xl font-semibold text-gray-800">
             Welcome back, {data.user.username || "User"}!
           </h1>
           <p className="text-gray-600 mt-1">
             Track your AI usage and carbon footprint
           </p>
         </div>
-        <button
-          onClick={() => {
-            localStorage.removeItem("firebaseToken");
-            router.push("/login");
-          }}
-          className="px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
-        >
-          Logout
-        </button>
+        <div className="flex gap-2 items-center">
+          <Offset />
+          <Button
+            onClick={() => {
+              localStorage.removeItem("firebaseToken");
+              router.push("/login");
+            }}
+            className="px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 cursor-pointer"
+          >
+            Logout
+          </Button>
+        </div>
       </div>
 
       {/* Limit Warnings */}
       {(data.exceeded.prompts || data.exceeded.co2) && (
         <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
-          <h3 className="font-semibold text-red-800 mb-2">⚠️ Daily Limits Exceeded</h3>
+          <h3 className="font-semibold text-red-800 mb-2">
+            ⚠️ Daily Limits Exceeded
+          </h3>
           {data.exceeded.prompts && (
             <p className="text-sm text-red-700">
-              You've exceeded your daily prompt limit ({data.user.dailyLimitPrompts})
+              You've exceeded your daily prompt limit (
+              {data.user.dailyLimitPrompts})
             </p>
           )}
           {data.exceeded.co2 && (
@@ -269,40 +272,39 @@ export default function Dashboard() {
       )}
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
         <DailyCards
-          number={data.today.promptCount}
+          number={data.today.promptCount || 0}
           title="Today's Prompts"
           increment={promptIncrement}
         />
         <PromptCard
-          number={data.user.promptTotal}
+          number={data.user.promptTotal || 0}
           title="Total Prompts"
           increment={dailyPromptsAvg}
         />
         <DailyCards
-          number={parseFloat(data.today.co2Total.toFixed(2))}
+          number={parseFloat((data.today.co2Total || 0).toFixed(2))}
           title="Today's CO2 (g)"
           increment={parseFloat(co2Increment.toFixed(2))}
         />
         <CO2Card
-          number={parseFloat((data.user.co2Total / 1000).toFixed(4))}
+          number={parseFloat(((data.user.co2Total || 0) / 1000).toFixed(4))}
           title="Total CO2"
           increment={parseFloat((dailyCo2Avg / 1000).toFixed(4))}
         />
       </div>
 
       {/* Charts Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-        <WeeklyChart
-          title="Last 7 Days Activity"
-          data={data.weekHistory}
-        />
+      <div className="flex gap-6 mb-4">
+        <div className="w-2/3">
+          <WeeklyChart title="Last 7 Days Activity" data={data.weekHistory} />
+        </div>
         <MiniLeaderboard />
       </div>
 
       {/* Heatmap */}
-      <div className="mb-6">
+      <div className="mb-4">
         <Heatmap data={data.yearHistory} />
       </div>
     </div>
