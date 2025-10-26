@@ -23,13 +23,20 @@ const DailyCards = ({
             </div>
             <span className="text-sm ">from yesterday</span>
           </>
-        ) : (
+        ) : increment < 0 ? (
           <>
             <div className="flex gap-1 items-center border border-red-500 rounded-lg px-2">
               <h3 className="text-sm font-semibold">{Math.abs(increment)}</h3>
               <ArrowDownRight className="text-red-500 w-4 h-4" />
             </div>
             <span className="text-sm">from yesterday</span>
+          </>
+        ) : (
+          <>
+            <div className="flex gap-1 items-center border border-gray-400 rounded-lg px-2">
+              <h3 className="text-sm font-semibold text-gray-600">{increment}</h3>
+            </div>
+            <span className="text-sm text-gray-600">from yesterday</span>
           </>
         )}
       </div>

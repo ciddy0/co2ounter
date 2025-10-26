@@ -18,6 +18,7 @@ const Heatmap = ({ data }) => {
     const completeValues = [];
 
     // Create a map from the data prop
+    const dataMap = new Map();
     if (data && Array.isArray(data)) {
       data.forEach((item) => {
         const dateKey = `${item.date.getUTCFullYear()}-${item.date.getUTCMonth()}-${item.date.getUTCDate()}`;
@@ -68,7 +69,7 @@ const Heatmap = ({ data }) => {
               return "color-empty";
             }
 
-            const maxCount = Math.max(...databaseValues.map((d) => d.count));
+            // Use the maxCount calculated above
 
             let level;
             if (value.count >= maxCount * 0.8) level = 5;
