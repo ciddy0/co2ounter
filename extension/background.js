@@ -4,6 +4,7 @@ let promptCount = 0;
 let totalInputTokens = 0;
 let totalOutputTokens = 0;
 let totalCO2 = 0; // grams
+let isLoggedIn = false;
 
 // Carbon calculation constants
 const MODEL_PARAMS = {
@@ -115,11 +116,24 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
   if (message.type === "STORE_TOKEN" && message.token) {
     firebaseToken = message.token;
+    isLoggedIn = true;
     chrome.storage.sync.set({ firebaseToken }, () => {
       console.log("✅ Stored Firebase token in chrome.storage");
+      updatePopup();
       sendResponse({ success: true });
     });
     return true; // async sendResponse
+  }
+  // Add a new message type for logout
+  if (message.type === "LOGOUT") {
+    firebaseToken = null;
+    isLoggedIn = false;
+    chrome.storage.sync.remove("firebaseToken", () => {
+      console.log("🚪 Logged out, token removed");
+      updatePopup(); // Update popup after logout
+      sendResponse({ success: true });
+    });
+    return true;
   }
 
   if (message.type === "PROMPT_SENT") {
@@ -164,3 +178,10 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
   return false;
 });
+
+// function to update popup based on auth state
+function updatePopup() {
+  const popupPath = isLoggedIn ? "content-popup.html" : "welcome-popup.html";
+  chrome.action.setPopup({ popup: popupPath });
+  console.log("🔄 Popup updated to:", popupPath);
+}
