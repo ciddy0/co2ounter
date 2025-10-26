@@ -34,9 +34,6 @@ export default function Home() {
               Install to Google Chrome
             </a>
             <div className="w-full max-w-lg shadow-md rounded-2xl overflow-hidden flex items-center justify-center">
-              {/* <span className="text-gray-500 dark:text-gray-400">
-                Placeholder Image
-              </span> */}
               <Image
                 src="/preview3.png"
                 alt="Preview"
@@ -118,9 +115,6 @@ export default function Home() {
       <header className="flex items-center justify-between p-4">
         <div className="flex items-center gap-2">
           <Image src="/happy.png" alt="Happy Cat" width={55} height={5} />
-          {/* <h1 className="text-xl font-bold text-black dark:text-white">
-            co2ounter
-          </h1> */}
         </div>
         <nav className="flex gap-6">
           <button
