@@ -52,6 +52,13 @@ body {
   border: none;
   border-radius: 5px;
   background: #f2f0ef;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.entry-button:hover {
+  background: #e0dedc;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
 }
 
 /* Icon */
