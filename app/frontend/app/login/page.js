@@ -1,8 +1,10 @@
 // app/frontend/pages/login.js
+"use client";
+
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { initializeApp } from "firebase/app";
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
-import { useRouter } from "next/router";
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -19,22 +21,31 @@ export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  async function handleLogin(e) {
-    e.preventDefault();
+  const handleLogin = async () => {
+    setLoading(true);
     try {
-      const cred = await signInWithEmailAndPassword(auth, email, password);
-      const idToken = await cred.user.getIdToken(); // firebase ID token (JWT)
-      // store in localStorage for website usage
-      localStorage.setItem("idToken", idToken);
+      const userCredential = await signInWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
+      const user = userCredential.user;
+      const token = await user.getIdToken();
 
-      // Redirect to auth/redirect page with token in fragment
-      // Using fragment (#) avoids server logs containing the token
-      router.push(`/auth/redirect#token=${encodeURIComponent(idToken)}`);
+      // Store token in chrome.storage.sync for extension
+      chrome.storage.sync.set({ firebaseToken: token }, () => {
+        console.log("✅ Firebase token stored in chrome.storage.sync");
+      });
+
+      // Navigate to home page
+      router.push("/");
     } catch (err) {
-      console.error("login error", err);
-      alert("Login failed: " + (err.message || err));
+      console.error(err);
+      alert(err.message);
+    } finally {
+      setLoading(false);
     }
-  }
+  };
 
   return (
     <div style={{ padding: 20 }}>
