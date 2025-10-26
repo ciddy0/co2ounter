@@ -12,7 +12,7 @@
   // Function to extract Claude model from the page DOM
   function getClaudeModelFromPage() {
     try {
-      // Look for the model selector text (e.g., "Sonnet 4.5", "Opus 4")
+      // Look for the model selector text
       const modelElements = document.querySelectorAll(
         '[class*="whitespace-nowrap"]'
       );
@@ -29,12 +29,12 @@
       for (const btn of buttons) {
         const text = btn.textContent.trim();
         if (text.match(/^(Sonnet|Opus|Haiku)\s+[\d.]+/i)) {
-          console.log("🤖 [INJECTED] Found Claude model in button:", text);
+          console.log("[INJECTED] Found Claude model in button:", text);
           return text;
         }
       }
     } catch (e) {
-      console.warn("⚠️ [INJECTED] Could not extract model from DOM:", e);
+      console.warn("[INJECTED] Could not extract model from DOM:", e);
     }
     return null;
   }
@@ -79,8 +79,8 @@
 
         // DEBUG: Log the entire request body for Claude
         if (isClaudeInput) {
-          console.log("🔍 [DEBUG] Full Claude request body:", requestData);
-          console.log("🔍 [DEBUG] Request keys:", Object.keys(requestData));
+          console.log("[DEBUG] Full Claude request body:", requestData);
+          console.log("[DEBUG] Request keys:", Object.keys(requestData));
         }
 
         let userText = "";
@@ -115,7 +115,7 @@
           const pageModel = getClaudeModelFromPage();
           if (pageModel) {
             model = pageModel;
-            console.log("🤖 [DEBUG] Using model from page:", model);
+            console.log("[DEBUG] Using model from page:", model);
           }
         }
 
@@ -231,7 +231,7 @@
                 // DEBUG: Log all event types from Claude
                 if (isClaudeOutput && parsed.type) {
                   console.log(
-                    `🔍 [DEBUG] Claude event type: ${parsed.type}`,
+                    `[DEBUG] Claude event type: ${parsed.type}`,
                     parsed
                   );
                 }
@@ -247,7 +247,7 @@
                   if (parsed.v?.message?.metadata?.model_slug) {
                     detectedModel = parsed.v.message.metadata.model_slug;
                     console.log(
-                      "🤖 [INJECTED] ChatGPT model detected:",
+                      "[INJECTED] ChatGPT model detected:",
                       detectedModel
                     );
                   }
@@ -258,7 +258,7 @@
                   ) {
                     detectedModel = parsed.metadata.model_slug;
                     console.log(
-                      "🤖 [INJECTED] ChatGPT model detected from metadata:",
+                      "[INJECTED] ChatGPT model detected from metadata:",
                       detectedModel
                     );
                   }
@@ -270,7 +270,7 @@
                   if (parsed.message?.model && parsed.message.model !== "") {
                     detectedModel = parsed.message.model;
                     console.log(
-                      "🤖 [INJECTED] Claude model detected from API:",
+                      "[INJECTED] Claude model detected from API:",
                       detectedModel
                     );
                   } else {
@@ -279,7 +279,7 @@
                     if (pageModel) {
                       detectedModel = pageModel;
                       console.log(
-                        "🤖 [INJECTED] Claude model detected from page:",
+                        "[INJECTED] Claude model detected from page:",
                         detectedModel
                       );
                     }
@@ -343,7 +343,7 @@
                 // Handle Claude message_stop - send final count
                 if (parsed.type === "message_stop" && fullText) {
                   const tokens = estimateTokens(fullText);
-                  console.log(`✅ [INJECTED] ${platform} final output:`, {
+                  console.log(`[INJECTED] ${platform} final output:`, {
                     tokens,
                     model: detectedModel,
                     preview: fullText.substring(0, 100),
@@ -365,7 +365,7 @@
             }
           }
         } catch (err) {
-          console.error("❌ [INJECTED] Error reading output stream:", err);
+          console.error("[INJECTED] Error reading output stream:", err);
         }
       })();
     }
@@ -374,6 +374,6 @@
   };
 
   console.log(
-    "🚀 [INJECTED] Token Counter: Fetch interceptor active (ChatGPT + Claude)"
+    "[INJECTED] Token Counter: Fetch interceptor active (ChatGPT + Claude)"
   );
 })();

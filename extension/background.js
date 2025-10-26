@@ -29,7 +29,7 @@ function calculateCarbon(model, tokens) {
 chrome.storage.sync.get({ firebaseToken: null }, (data) => {
   firebaseToken = data.firebaseToken;
   isLoggedIn = !!firebaseToken;
-  console.log("🔑 Loaded Firebase token:", firebaseToken ? "YES" : "NO");
+  console.log("Loaded Firebase token:", firebaseToken ? "YES" : "NO");
   updatePopup();
   if (isLoggedIn) {
     updateBadgeFromFirebase(); // Load initial badge count
@@ -39,7 +39,7 @@ chrome.storage.sync.get({ firebaseToken: null }, (data) => {
 // Backend sync helper
 async function syncWithBackend(endpoint, body) {
   if (!firebaseToken) {
-    console.warn("⚠️ No Firebase token, skipping backend sync");
+    console.warn("No Firebase token, skipping backend sync");
     return null;
   }
   try {
@@ -55,7 +55,7 @@ async function syncWithBackend(endpoint, body) {
     console.log("☁️ Backend sync result:", endpoint, json);
     return json;
   } catch (err) {
-    console.error("❌ Backend sync failed:", err);
+    console.error("Backend sync failed:", err);
     return null;
   }
 }
@@ -76,7 +76,7 @@ async function fetchStatsFromBackend() {
     const json = await res.json();
     return json;
   } catch (err) {
-    console.error("❌ Failed to fetch stats:", err);
+    console.error("Failed to fetch stats:", err);
     return null;
   }
 }
@@ -108,7 +108,7 @@ async function updateBadgeFromFirebase() {
     }
 
     chrome.action.setBadgeBackgroundColor({ color });
-    console.log("🔖 Badge updated:", count, "Color:", color);
+    console.log("Badge updated:", count, "Color:", color);
   } else {
     // Clear badge if no stats available
     chrome.action.setBadgeText({ text: "" });
@@ -129,13 +129,13 @@ function notifyPopup() {
 
 // Main message handler
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  console.log("📨 Received message:", message.type, message);
+  console.log("Received message:", message.type, message);
 
   if (message.type === "STORE_TOKEN" && message.token) {
     firebaseToken = message.token;
     isLoggedIn = true;
     chrome.storage.sync.set({ firebaseToken }, () => {
-      console.log("✅ Stored Firebase token in chrome.storage");
+      console.log("Stored Firebase token in chrome.storage");
       updatePopup();
       updateBadgeFromFirebase();
       sendResponse({ success: true });
@@ -144,7 +144,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   }
 
   if (message.type === "LOGOUT") {
-    console.log("🚪 Logging out user...");
+    console.log("Logging out user...");
 
     // Clear state immediately
     firebaseToken = null;
@@ -155,12 +155,12 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
     // Update popup path BEFORE clearing storage
     chrome.action.setPopup({ popup: "welcome-popup.html" });
-    console.log("🔄 Popup path updated to welcome-popup.html");
+    console.log("Popup path updated to welcome-popup.html");
 
     // Then clear storage
     chrome.storage.sync.remove("firebaseToken", () => {
-      console.log("✅ Token removed from storage");
-      console.log("🎉 Logout complete!");
+      console.log("Token removed from storage");
+      console.log("Logout complete!");
 
       // Send success response
       sendResponse({ success: true });
@@ -224,7 +224,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.type === "RESET_STATS") {
     // Note: Backend doesn't have a reset endpoint
     // You could implement one or just refresh the display
-    console.log("⚠️ Reset not implemented on backend");
+    console.log("Reset not implemented on backend");
     sendResponse({ success: false, error: "Reset not available" });
     return true;
   }
@@ -236,7 +236,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 function updatePopup() {
   const popupPath = isLoggedIn ? "content-popup.html" : "welcome-popup.html";
   chrome.action.setPopup({ popup: popupPath });
-  console.log("🔄 Popup updated to:", popupPath);
+  console.log("Popup updated to:", popupPath);
 }
 
 // Refresh badge periodically (every 5 minutes) - only if logged in

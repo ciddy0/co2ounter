@@ -10,19 +10,19 @@ function processQueue() {
   sending = true;
   const msg = messageQueue.shift();
 
-  console.log("🚀 Processing message from queue:", msg);
+  console.log("Processing message from queue:", msg);
 
   chrome.runtime.sendMessage(msg, (response) => {
     sending = false;
     if (chrome.runtime.lastError) {
       console.warn(
-        "❌ Failed to send message, re-queueing",
+        "Failed to send message, re-queueing",
         msg,
         chrome.runtime.lastError
       );
       messageQueue.unshift(msg);
     } else {
-      console.log("✅ Message sent to background:", msg.type);
+      console.log("Message sent to background:", msg.type);
     }
     setTimeout(processQueue, SEND_INTERVAL);
   });
@@ -43,7 +43,7 @@ if (isChatGPT || isClaude) {
   const script = document.createElement("script");
   script.src = chrome.runtime.getURL("injected.js");
   script.onload = function () {
-    console.log("✅ Injected script loaded");
+    console.log("Injected script loaded");
     this.remove();
   };
   (document.head || document.documentElement).appendChild(script);
@@ -55,7 +55,7 @@ if (isChatGPT || isClaude) {
 
 // ==================== GEMINI TRACKER (No injected.js support yet) ====================
 if (isGemini) {
-  console.log("🔵 Gemini tracker initialized");
+  console.log("Gemini tracker initialized");
 
   const originalFetch = window.fetch;
   window.fetch = async function (...args) {
@@ -80,7 +80,7 @@ if (isGemini) {
 
           const inputTokens = Math.ceil(totalText.length / 4);
 
-          console.log("📤 Gemini prompt:", {
+          console.log("Gemini prompt:", {
             preview: totalText.substring(0, 50) + "...",
             inputTokens,
           });
@@ -93,7 +93,7 @@ if (isGemini) {
           processQueue();
         }
       } catch (err) {
-        console.error("❌ Error parsing Gemini request:", err);
+        console.error("Error parsing Gemini request:", err);
       }
     }
 
@@ -111,7 +111,7 @@ if (isGemini) {
             if (data.usageMetadata?.candidatesTokenCount) {
               const outputTokens = data.usageMetadata.candidatesTokenCount;
 
-              console.log("📥 Gemini response tokens:", outputTokens);
+              console.log("Gemini response tokens:", outputTokens);
 
               messageQueue.push({
                 type: "RESPONSE_TOKENS",
@@ -129,10 +129,7 @@ if (isGemini) {
 
               const outputTokens = Math.ceil(totalText.length / 4);
 
-              console.log(
-                "📥 Gemini response tokens (estimated):",
-                outputTokens
-              );
+              console.log("Gemini response tokens (estimated):", outputTokens);
 
               messageQueue.push({
                 type: "RESPONSE_TOKENS",
@@ -142,7 +139,7 @@ if (isGemini) {
               processQueue();
             }
           } catch (err) {
-            console.error("❌ Error parsing Gemini response:", err);
+            console.error("Error parsing Gemini response:", err);
           }
 
           return new Response(JSON.stringify(data), {
@@ -176,11 +173,11 @@ window.addEventListener("message", (event) => {
       (response) => {
         if (chrome.runtime.lastError) {
           console.error(
-            "❌ Failed to store token:",
+            "Failed to store token:",
             chrome.runtime.lastError.message
           );
         } else {
-          console.log("✅ Token stored successfully:", response);
+          console.log("Token stored successfully:", response);
         }
       }
     );
@@ -189,7 +186,7 @@ window.addEventListener("message", (event) => {
 
   // Handle input tokens from injected.js
   if (type === "TOKEN_COUNTER_INPUT") {
-    console.log("📨 Received input tokens:", {
+    console.log("Received input tokens:", {
       inputTokens,
       model,
       preview: text,
@@ -223,7 +220,7 @@ window.addEventListener("message", (event) => {
 
   // Handle output tokens from injected.js
   if (type === "TOKEN_COUNTER_OUTPUT") {
-    console.log("📨 Received output tokens:", { tokens, model, preview: text });
+    console.log("Received output tokens:", { tokens, model, preview: text });
 
     // Map model names to our backend format
     let mappedModel = "chatgpt"; // default
@@ -252,4 +249,4 @@ window.addEventListener("message", (event) => {
   }
 });
 
-console.log("👂 Content script ready and listening...");
+console.log("Content script ready and listening...");

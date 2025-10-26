@@ -10,7 +10,6 @@ const jwt = require("jsonwebtoken");
 const PORT = process.env.PORT || 4000;
 const app = express();
 
-// Updated CORS to allow Chrome extension
 const allowedOrigins = (
   process.env.CORS_ORIGINS || "http://localhost:3000"
 ).split(",");
@@ -110,11 +109,9 @@ app.post("/api/prompt", verifyToken, async (req, res) => {
 
   try {
     await db.runTransaction(async (tx) => {
-      // ⭐ ALL READS MUST COME FIRST ⭐
       const userSnap = await tx.get(userRef);
       const historySnap = await tx.get(historyRef);
 
-      // NOW DO ALL WRITES
       if (!userSnap.exists) {
         tx.set(
           userRef,
@@ -226,11 +223,9 @@ app.post("/api/response", verifyToken, async (req, res) => {
 
   try {
     await db.runTransaction(async (tx) => {
-      // ⭐ ALL READS MUST COME FIRST ⭐
       const userSnap = await tx.get(userRef);
       const historySnap = await tx.get(historyRef);
 
-      // NOW DO ALL WRITES
       if (!userSnap.exists) {
         tx.set(
           userRef,
@@ -355,14 +350,14 @@ app.get("/api/history/year", verifyToken, async (req, res) => {
     const userRef = db.collection("users").doc(uid);
     const historyRef = userRef.collection("history");
 
-    // Get all history documents (no orderBy needed since we'll sort by doc ID)
+    // Get all history documents
     const snapshot = await historyRef.get();
 
     const history = [];
     snapshot.forEach((doc) => {
       const data = doc.data();
       history.push({
-        date: doc.id, // The document ID is the date string (YYYY-MM-DD)
+        date: doc.id,
         promptCount: data.promptCount || 0,
         co2Total: data.co2Total || 0,
         outputTokens: data.outputTokens || 0,
@@ -404,9 +399,9 @@ app.get("/api/history/range", verifyToken, async (req, res) => {
 
     const history = [];
     snapshot.forEach((doc) => {
-      const dateId = doc.id; // YYYY-MM-DD format
+      const dateId = doc.id;
 
-      // Filter by date range using string comparison (works with YYYY-MM-DD format)
+      // Filter by date range using string comparison
       if (dateId >= startDate && dateId <= endDate) {
         const data = doc.data();
         history.push({
@@ -448,7 +443,7 @@ app.post("/api/auth/extension-token", async (req, res) => {
     const userData = userDoc.data() || {};
 
     if (!process.env.JWT_SECRET) {
-      console.error("❌ JWT_SECRET is not configured in .env file!");
+      console.error("JWT_SECRET is not configured in .env file!");
       return res.status(500).json({ error: "Server configuration error" });
     }
 

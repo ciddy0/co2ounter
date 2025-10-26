@@ -25,7 +25,7 @@ async function verifyToken(req, res, next) {
       email: decoded.email,
     };
 
-    console.log("✅ Token verified for user:", decoded.uid);
+    console.log("Token verified for user:", decoded.uid);
     next();
   } catch (err) {
     console.error("verifyToken failed:", err.message);

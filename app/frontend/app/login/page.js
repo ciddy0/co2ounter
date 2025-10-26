@@ -42,12 +42,11 @@ export default function LoginPage() {
         password
       );
       const user = userCredential.user;
-      // Step 2: Get Firebase ID token
+      // Get Firebase ID token
       const firebaseIdToken = await user.getIdToken();
-      console.log("🔑 Got Firebase ID token");
+      console.log("Got Firebase ID token");
 
-      // Step 3: Exchange Firebase token for custom extension token
-      // Step 3: Exchange Firebase token for custom extension token
+      // Exchange Firebase token for custom extension token
       const response = await fetch(
         "http://localhost:4000/api/auth/extension-token",
         {
@@ -65,13 +64,13 @@ export default function LoginPage() {
         throw new Error(data.error || "Failed to generate extension token");
       }
 
-      console.log("✅ Custom extension token generated");
+      console.log("Custom extension token generated");
 
-      // Step 4: Send custom token to extension via postMessage
+      // Send custom token to extension via postMessage
       window.postMessage(
         {
           type: "FIREBASE_TOKEN",
-          token: data.token, // This is the custom 30-day JWT
+          token: data.token,
           user: data.user,
         },
         "*"
@@ -82,9 +81,9 @@ export default function LoginPage() {
       console.log("💾 Token saved to localStorage");
 
       // Show success message
-      alert("✅ Login successful! Extension is now connected.");
+      alert("Login successful! Extension is now connected.");
       setTimeout(() => {
-        console.log("✅ Navigating to home...");
+        console.log("Navigating to home...");
         router.push("/dashboard");
       }, 300);
     } catch (err) {

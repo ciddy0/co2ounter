@@ -24,7 +24,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const token = await getToken();
 
     if (!token) {
-      console.warn("⚠️ No token found, redirecting to login");
+      console.warn("No token found, redirecting to login");
       // Show login required state
       if (userNameEl) userNameEl.innerText = "Not logged in";
       if (promptCountEl) promptCountEl.innerText = "0";
@@ -46,13 +46,13 @@ document.addEventListener("DOMContentLoaded", async () => {
       }
 
       const data = await response.json();
-      console.log("📊 Stats fetched from Firebase:", data);
+      console.log("Stats fetched from Firebase:", data);
 
       if (data.success) {
         updateUI(data);
       }
     } catch (error) {
-      console.error("❌ Failed to fetch stats:", error);
+      console.error("Failed to fetch stats:", error);
       if (userNameEl) userNameEl.innerText = "Error loading data";
       if (promptCountEl) promptCountEl.innerText = "?";
       if (co2CountEl) co2CountEl.innerText = "?";
@@ -63,7 +63,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   function updateUI(data) {
     const { user, today, exceeded } = data;
 
-    console.log("📊 Updating UI with data:", { user, today, exceeded });
+    console.log("Updating UI with data:", { user, today, exceeded });
 
     // Update username
     if (userNameEl) {
@@ -112,7 +112,7 @@ document.addEventListener("DOMContentLoaded", async () => {
           "Maximum chaos unleashed! 💥",
           "Brain is mush! 🧠💥",
           "Reality is bending! 🌀",
-          "Mayday, mayday! 🚨",
+          "Ur Cooked 🚨",
         ];
         message =
           extremeMessages[Math.floor(Math.random() * extremeMessages.length)];
@@ -148,7 +148,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     // Highlight if exceeded
     if (exceeded.prompts || exceeded.co2) {
-      console.warn("⚠️ Daily limit exceeded:", exceeded);
+      console.warn("Daily limit exceeded:", exceeded);
       if (exceeded.prompts && promptCountEl)
         promptCountEl.style.color = "#ff6b6b";
       if (exceeded.co2 && co2CountEl) co2CountEl.style.color = "#ff6b6b";
@@ -172,13 +172,13 @@ document.addEventListener("DOMContentLoaded", async () => {
           }
 
           if (response && response.success) {
-            console.log("✅ Logged out successfully");
+            console.log("Logged out successfully");
             // Close the popup
             window.close();
           }
         });
       } catch (error) {
-        console.error("❌ Logout failed:", error);
+        console.error("Logout failed:", error);
         alert("Failed to log out. Please try again.");
       }
     });
@@ -197,7 +197,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   // Listen for updates from background script
   chrome.runtime.onMessage.addListener((message) => {
     if (message.type === "STATS_UPDATED") {
-      console.log("🔄 Stats updated, refreshing...");
+      console.log("Stats updated, refreshing...");
       fetchStats(); // Re-fetch from Firebase
     }
   });
@@ -262,10 +262,10 @@ document.addEventListener("DOMContentLoaded", async () => {
         fetchStats(); // refresh UI
         modal.style.display = "none";
       } else {
-        alert("❌ Failed to update limits: " + (data.error || "Unknown error"));
+        alert("Failed to update limits: " + (data.error || "Unknown error"));
       }
     } catch (err) {
-      console.error("❌ Failed to set limits:", err);
+      console.error("Failed to set limits:", err);
       alert("Error updating limits");
     }
   });
