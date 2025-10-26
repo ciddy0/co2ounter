@@ -6,6 +6,24 @@
     <link rel="stylesheet" href="content-styles.css" />
   </head>
   <body>
+    <!-- Edit Limits Modal -->
+    <div id="editLimitsModal" class="modal">
+      <div class="modal-content">
+        <h2>Edit Daily Limits</h2>
+        <label>
+          Daily Prompt Limit:
+          <input type="number" id="modalPromptLimit" placeholder="No limit" />
+        </label>
+        <label>
+          Daily CO₂ Limit (g):
+          <input type="number" id="modalCo2Limit" placeholder="No limit" />
+        </label>
+        <div class="modal-buttons">
+          <button id="modalCancelBtn">Cancel</button>
+          <button id="modalSaveBtn">Save</button>
+        </div>
+      </div>
+    </div>
     <header>
       <div class="logo-name-container">
         <img src="icons/happy_cat.svg" class="header-icon" />
@@ -14,38 +32,40 @@
       <button class="logout-button" id="logoutBtn">Log out</button>
     </header>
 
-    <!-- User info section -->
-    <div class="user-info-container">
-      <p class="user-info-text">👤 <strong id="userName">Loading...</strong></p>
-    </div>
-
-    <div class="limit-container">
-      <p>Daily limits:</p>
-      <img src="icons/bell.svg" class="bell-icon" />
-    </div>
-
     <div class="prompt-content-container">
-      <div class="stats-container">
-        <div class="stats">
-          <div class="stats-name">Prompts</div>
-          <div class="stats-data" id="promptCount">0</div>
-        </div>
-        <div class="stats">
-          <div class="stats-name">CO<sub>2</sub> Emissions</div>
-          <div class="stats-data" id="co2Count">0g</div>
+      <div class="today-stats">
+        <p class="today-header">Today:</p>
+        <div class="stats-container">
+          <div class="stats">
+            <div class="stats-name">Prompts</div>
+            <div class="stats-data" id="promptCount">0</div>
+          </div>
+          <div class="stats">
+            <div class="stats-name">CO<sub>2</sub> Emissions</div>
+            <div class="stats-data" id="co2Count">0g</div>
+          </div>
         </div>
       </div>
-      <img src="icons/disappointed_cat.svg" class="cat-icon" />
+      <img id="promptCat" src="icons/disappointed_cat.svg" class="cat-icon" />
       <div class="prompt-message">
-        That's <span id="promptMsg">0</span> prompts<span id="promptMessage">
-          lets tone it down bro.</span
-        >
+        <span id="promptMsg">0</span> prompts! <span id="promptMessage"></span>
       </div>
     </div>
 
     <div class="bottom-content-container">
       <button class="dashboard-button" id="dashboardBtn">Dashboard</button>
-      <div class="details-text">Click to show more details</div>
+    </div>
+
+    <div id="limitsContainer" class="text-sm mt-2">
+      <img
+        src="icons/edit.svg"
+        id="editLimitsBtn"
+        class="edit-icon"
+        alt="Edit Limits"
+      />
+      <div id="limitsText">
+        <!-- JS will insert daily limits here -->
+      </div>
     </div>
 
     <script src="content-popup.js"></script>

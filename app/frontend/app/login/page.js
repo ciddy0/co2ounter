@@ -7,7 +7,6 @@ import { initializeApp } from "firebase/app";
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
 import {
   Card,
-  // CardAction,
   CardContent,
   CardDescription,
   CardFooter,
@@ -98,7 +97,7 @@ export default function LoginPage() {
 
   return (
     <div className="flex items-center justify-center min-h-screen">
-      <Card className="w-1/2 max-w-md gap-4 border-[0.5px] border-gray-500">
+      <Card className="w-1/2 max-w-md gap-4 border border-border">
         <CardHeader>
           <CardTitle>Login to your account</CardTitle>
           <CardDescription>Enter your information to sign in</CardDescription>
@@ -111,7 +110,7 @@ export default function LoginPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder=""
-                className="w-full h-10 p-3 bg-[#212121] border-[0.5px] border-gray-500 rounded-md "
+                className="w-full h-10 p-3 bg-input border border-border rounded-md "
               />
             </div>
             <div className="space-y-2">
@@ -121,12 +120,12 @@ export default function LoginPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder=""
-                className="w-full h-10 p-3 bg-[#212121] border-[0.5px] border-gray-500 rounded-md "
+                className="w-full h-10 p-3 bg-input border border-border rounded-md "
               />
             </div>
             <button
               type="submit"
-              className="mt-2 w-full h-10 bg-white text-black rounded-md p-1"
+              className="mt-2 w-full h-10 bg-primary text-primary-foreground rounded-md p-1"
             >
               Login
             </button>

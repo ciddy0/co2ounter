@@ -1,31 +1,52 @@
 "use client";
 import Image from "next/image";
 import { useState } from "react";
+import * as React from "react";
+import { Moon, Sun } from "lucide-react";
+import { useTheme } from "next-themes";
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 export default function Home() {
   const [activeSection, setActiveSection] = useState("home"); // home, team
+  const { setTheme } = useTheme();
 
   const renderContent = () => {
     switch (activeSection) {
       case "home":
         return (
-          <div className="flex flex-col items-center justify-center flex-1 px-4 text-center space-y-6">
-            <h1 className="text-3xl mb-0 font-bold text-black dark:text-white">
-              co2ounter
-            </h1>
-            <h2 className="text-xl font-semibold text-[#BC9E9E]">
-              Track and reduce your AI carbon impact.
-            </h2>
-            <a
-              href="#"
-              className="px-8 py-3 bg-green-600 text-white font-semibold rounded hover:bg-green-700 transition"
-            >
-              Download
-            </a>
-            <div className="w-full max-w-md h-64 bg-gray-200 dark:bg-gray-800 rounded-md flex items-center justify-center">
-              <span className="text-gray-500 dark:text-gray-400">
-                Placeholder Image
-              </span>
+          <div className="flex flex-col md:flex-row items-center justify-center gap-x-52 px-[2rem] md:space-x-4 space-y-6 md:space-y-0 max-w-5xl mx-auto my-auto">
+            {/* Left: Title and Slogan */}
+            <div className="flex flex-col items-start text-left space-y-4 flex-1">
+              <h1 className="text-4xl font-bold text-black dark:text-white">
+                co2ounter
+              </h1>
+              <h2 className="text-xl font-semibold text-gray-400">
+                Track and reduce your AI carbon impact.
+              </h2>
+              <a
+                href="#"
+                className="px-8 py-3 bg-green-600 rounded text-white font-semibold hover:bg-green-700 transition"
+              >
+                Download
+              </a>
+            </div>
+
+            {/* Right: Image */}
+            <div className="w-full md:w-auto rounded-md overflow-hidden flex items-center justify-center flex-shrink-0">
+              <Image
+                src="/preview.png"
+                alt="Preview"
+                width={299}
+                height={575}
+                style={{ width: "auto", height: "100%" }}
+                className="border-2 border-[#bae6fd] rounded"
+              />
             </div>
           </div>
         );
@@ -99,10 +120,10 @@ export default function Home() {
       {/* Top Navigation */}
       <header className="flex items-center justify-between p-4">
         <div className="flex items-center gap-2">
-          <Image src="/happy.png" alt="Happy Cat" width={40} height={40} />
-          <h1 className="text-xl font-bold text-black dark:text-white">
+          <Image src="/happy.png" alt="Happy Cat" width={50} height={50} />
+          {/* <h1 className="text-xl font-bold text-black dark:text-white">
             co2ounter
-          </h1>
+          </h1> */}
         </div>
         <nav className="flex gap-6">
           <button
@@ -119,6 +140,26 @@ export default function Home() {
           >
             Team
           </button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="icon">
+                <Sun className="h-[1.2rem] w-[1.2rem] scale-100 rotate-0 transition-all dark:scale-0 dark:-rotate-90" />
+                <Moon className="absolute h-[1.2rem] w-[1.2rem] scale-0 rotate-90 transition-all dark:scale-100 dark:rotate-0" />
+                <span className="sr-only">Toggle theme</span>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => setTheme("light")}>
+                Light
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setTheme("dark")}>
+                Dark
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setTheme("system")}>
+                System
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </nav>
       </header>
 

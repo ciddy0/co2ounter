@@ -2,10 +2,10 @@
 import CalendarHeatmap from "react-calendar-heatmap";
 import { Tooltip } from "react-tooltip";
 import "./heatmap.css";
-import databaseValues from "../../data.js";
 
-const Heatmap = () => {
+const Heatmap = ({ data }) => {
   const today = new Date();
+  
   const shiftDate = (date, days) => {
     const newDate = new Date(date);
     newDate.setDate(newDate.getDate() + days);
@@ -16,13 +16,16 @@ const Heatmap = () => {
     const startDate = shiftDate(today, -364);
     const endDate = today;
     const completeValues = [];
-
-    const dataMap = new Map();
-    databaseValues.forEach((item) => {
-      const dateKey = `${item.date.getUTCFullYear()}-${item.date.getUTCMonth()}-${item.date.getUTCDate()}`;
+    
+    // Create a map from the data prop
+    if (data && Array.isArray(data)) {
+      data.forEach((item) => {
+        const dateKey = `${item.date.getUTCFullYear()}-${item.date.getUTCMonth()}-${item.date.getUTCDate()}`;
       dataMap.set(dateKey, item.count);
-    });
+      });
+    }
 
+    // Fill in all dates for the past year
     const currentDate = new Date(startDate);
     while (currentDate <= endDate) {
       const dateKey = `${currentDate.getUTCFullYear()}-${currentDate.getUTCMonth()}-${currentDate.getUTCDate()}`;
@@ -37,10 +40,16 @@ const Heatmap = () => {
   };
 
   const values = generateCompleteValues();
-  const totalPrompts = databaseValues.reduce(
-    (sum, item) => sum + item.count,
-    0
-  );
+  
+  // Calculate total prompts from the data prop
+  const totalPrompts = data && Array.isArray(data) 
+    ? data.reduce((sum, item) => sum + item.count, 0)
+    : 0;
+
+  // Calculate max count for scaling
+  const maxCount = data && Array.isArray(data) 
+    ? Math.max(...data.map((d) => d.count), 1) // Minimum of 1 to avoid division by zero
+    : 1;
 
   return (
     <div className="flex flex-col gap-4 p-6 bg-white rounded-3xl h-full">
@@ -83,9 +92,7 @@ const Heatmap = () => {
             }
             return {
               "data-tooltip-id": "heatmap-tooltip",
-              "data-tooltip-content": `${
-                value.count
-              } prompts on ${value.date.toDateString()}`,
+              "data-tooltip-content": `${value.count} prompts on ${value.date.toDateString()}`,
             };
           }}
           showMonthLabels
