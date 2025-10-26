@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Prompt Tracker</title>
+    <link rel="stylesheet" href="content-styles.css" />
+  </head>
+  <body>
+    <header>
+      <div class="logo-name-container">
+        <img src="icons/happy_cat.svg" class="header-icon" />
+        <div class="extension-name">co2ounter</div>
+      </div>
+      <button class="logout-button" id="logoutBtn">Log out</button>
+    </header>
+
+    <!-- User info section -->
+    <div class="user-info-container">
+      <p class="user-info-text">👤 <strong id="userName">Loading...</strong></p>
+    </div>
+
+    <div class="limit-container">
+      <p>Daily limits:</p>
+      <img src="icons/bell.svg" class="bell-icon" />
+    </div>
+
+    <div class="prompt-content-container">
+      <div class="stats-container">
+        <div class="stats">
+          <div class="stats-name">Prompts</div>
+          <div class="stats-data" id="promptCount">0</div>
+        </div>
+        <div class="stats">
+          <div class="stats-name">CO<sub>2</sub> Emissions</div>
+          <div class="stats-data" id="co2Count">0g</div>
+        </div>
+      </div>
+      <img src="icons/disappointed_cat.svg" class="cat-icon" />
+      <div class="prompt-message">
+        That's <span id="promptMsg">0</span> prompts<span id="promptMessage">
+          lets tone it down bro.</span
+        >
+      </div>
+    </div>
+
+    <div class="bottom-content-container">
+      <button class="dashboard-button" id="dashboardBtn">Dashboard</button>
+      <div class="details-text">Click to show more details</div>
+    </div>
+
+    <script src="content-popup.js"></script>
+  </body>
+</html>

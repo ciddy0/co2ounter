@@ -1,20 +1,47 @@
 {
-    "manifest_version": 3,
-    "name": "Co2oounter",
-    "version": "1.0",
-    "description": "Count how mnay prompts you are making",
-    "permissions": ["storage", "webRequest", "webRequestBlocking"],
-    "host_permissions": [
-         "https://chat.openai.com/*",
+  "manifest_version": 3,
+  "name": "Token Counter",
+  "version": "1.0",
+  "permissions": ["storage", "scripting"],
+  "host_permissions": [
+    "https://chat.openai.com/*",
+    "https://chatgpt.com/*",
+    "https://claude.ai/*",
+    "https://our-frontend-domain.com/*",
+    "http://localhost:3000/*"
+  ],
+  "externally_connectable": {
+    "matches": ["http://localhost:3000/*"]
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://chat.openai.com/*",
         "https://chatgpt.com/*",
         "https://claude.ai/*",
-        "https://gemini.google.com/*"
-    ],
-    "background": {
-        "service_worker": "background.js"
-    },
-    "action": {
-        "default_popup": "popup.html",
-        "default_icon": "leaf.png"
+        "https://our-frontend-domain.com/*",
+        "http://localhost:3000/*"
+      ],
+      "js": ["content.js"],
+      "run_at": "document_start"
     }
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "web_accessible_resources": [
+    {
+      "resources": ["injected.js"],
+      "matches": [
+        "https://chat.openai.com/*",
+        "https://chatgpt.com/*",
+        "http://localhost:3000/*",
+        "https://claude.ai/*"
+      ]
+    }
+  ],
+  "action": {
+    "default_popup": "welcome-popup.html",
+    "default_icon": "leaf.png"
+  }
 }
