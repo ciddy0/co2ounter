@@ -87,12 +87,41 @@ document.addEventListener("DOMContentLoaded", async () => {
       promptMsgEl.innerText = displayPromptCount.toLocaleString();
     }
 
-    if (promptMessageEl) {
+    // Update prompt message & cat image
+    if (promptMessageEl && promptMsgEl) {
       const count = displayPromptCount;
-      if (count === 0) promptMessageEl.innerText = " today. Let's get started!";
-      else if (count < 10) promptMessageEl.innerText = " today. Looking good!";
-      else if (count < 50) promptMessageEl.innerText = " today. Keep it up!";
-      else promptMessageEl.innerText = " today. Let's tone it down!";
+      const catImgEl = document.getElementById("promptCat");
+
+      let message = "";
+      let catSrc = "";
+
+      if (count === 0) {
+        message = "A fresh start! Let’s keep it calm 🌿";
+        catSrc = "icons/happy_cat.svg";
+      } else if (count < 10) {
+        message = "Tension rising!";
+        catSrc = "icons/disappointed_cat.svg";
+      } else if (count < 50) {
+        message = "Slow down! ⚡";
+        catSrc = "icons/shocked_cat.svg";
+      } else {
+        const extremeMessages = [
+          "This is peak madness! 😱",
+          "Take a break! 😱",
+          "You're doing too much. 😱",
+          "Maximum chaos unleashed! 💥",
+          "Brain is mush! 🧠💥",
+          "Reality is bending! 🌀",
+          "Mayday, mayday! 🚨",
+        ];
+        message =
+          extremeMessages[Math.floor(Math.random() * extremeMessages.length)];
+        catSrc = "icons/sad_cat.svg";
+      }
+
+      promptMsgEl.innerText = count.toLocaleString();
+      promptMessageEl.innerText = message;
+      if (catImgEl) catImgEl.src = catSrc;
     }
 
     // Reset colors
@@ -123,6 +152,11 @@ document.addEventListener("DOMContentLoaded", async () => {
       if (exceeded.prompts && promptCountEl)
         promptCountEl.style.color = "#ff6b6b";
       if (exceeded.co2 && co2CountEl) co2CountEl.style.color = "#ff6b6b";
+      chrome.runtime.sendMessage({
+        type: "LIMIT_EXCEEDED",
+        promptExceeded: exceeded.prompts,
+        co2Exceeded: exceeded.co2,
+      });
     }
   }
 
