@@ -1,3 +1,6 @@
+import { MoveRight } from "lucide-react";
+import Link from "next/link";
+
 interface LeaderboardEntry {
   rank: number;
   name: string;
@@ -45,9 +48,18 @@ const MiniLeaderboard = () => {
 
   return (
     <div className="flex flex-col p-6 bg-white rounded-3xl h-full">
-      <h2 className="text-xl font-semibold text-gray-800 pb-2">
-        Top AI Demons
-      </h2>
+      <div className="flex justify-between items-center">
+        <h2 className="text-xl font-semibold text-gray-800 pb-2">
+          Top AI Demons
+        </h2>
+        <Link
+          href="/leaderboard"
+          className="flex justify-end items-center gap-2 cursor-pointer"
+        >
+          <h4 className="text-sm text-gray-500">See more</h4>
+          <MoveRight className="w-4 h-4 text-gray-500" />
+        </Link>
+      </div>
 
       <div className="grid grid-cols-4 gap-2 text-sm font-medium text-gray-500 py-2">
         <div>Rank</div>
