@@ -29,7 +29,7 @@ const WeeklyChart = ({
   const startOfWeek = new Date(today);
   startOfWeek.setDate(today.getDate() - currentDayOfWeek);
 
-  const dayNames = ["S", "M", "T", "W", "T", "F", "S"];
+  const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
   const chartData = [];
 
   for (let i = 0; i < 7; i++) {
@@ -50,6 +50,7 @@ const WeeklyChart = ({
     });
   }
 
+  console.log(chartData);
   // Calculate max value for color scaling
   const maxCount = Math.max(...chartData.map((d) => d.count));
 
