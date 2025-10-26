@@ -24,7 +24,7 @@
  */
 
 .react-calendar-heatmap .color-empty {
-  fill: #eeeeee;
+  fill: #f4f6f8;
 }
 
 .react-calendar-heatmap .color-filled {
@@ -35,38 +35,27 @@
  * Github color scale
  */
 
-.react-calendar-heatmap .color-github-0 {
-  fill: #eeeeee;
+.react-calendar-heatmap .color-0 {
+  fill: #f4f6f8;
 }
-.react-calendar-heatmap .color-github-1 {
-  fill: #d6e685;
+.react-calendar-heatmap .color-1 {
+  fill: #c8e1f5;
 }
-.react-calendar-heatmap .color-github-2 {
-  fill: #8cc665;
+.react-calendar-heatmap .color-2 {
+  fill: #8cc4e8;
 }
-.react-calendar-heatmap .color-github-3 {
-  fill: #44a340;
+.react-calendar-heatmap .color-3 {
+  fill: #5aa7db;
 }
-.react-calendar-heatmap .color-github-4 {
-  fill: #1e6823;
+.react-calendar-heatmap .color-4 {
+  fill: #6b96c1;
+}
+.react-calendar-heatmap .color-5 {
+  fill: #4a6b8a;
 }
 
-/*
- * Gitlab color scale
- */
-
-.react-calendar-heatmap .color-gitlab-0 {
-  fill: #ededed;
-}
-.react-calendar-heatmap .color-gitlab-1 {
-  fill: #acd5f2;
-}
-.react-calendar-heatmap .color-gitlab-2 {
-  fill: #7fa8d1;
-}
-.react-calendar-heatmap .color-gitlab-3 {
-  fill: #49729b;
-}
-.react-calendar-heatmap .color-gitlab-4 {
-  fill: #254e77;
+/* Rounded corners for all heatmap squares */
+.react-calendar-heatmap rect {
+  rx: 4;
+  ry: 4;
 }

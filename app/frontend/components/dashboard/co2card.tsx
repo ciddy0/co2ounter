@@ -10,7 +10,7 @@ const CO2Card = ({
   increment: number;
 }) => {
   return (
-    <div className="flex flex-col gap-4 p-6 bg-white rounded-lg shadow-md">
+    <div className="flex flex-col gap-4 p-6 bg-white rounded-3xl">
       <h2 className="font-semibold">{title}</h2>
       <h1 className="text-3xl font-bold">{number}</h1>
 

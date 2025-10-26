@@ -55,17 +55,18 @@ const WeeklyChart = ({
 
   // Custom bar colors based on count
   const getBarColor = (count: number) => {
-    if (count === 0) return "#f3f4f6"; // gray-100 for no data
-    if (count >= maxCount * 0.8) return "#166534"; // green-800
-    if (count >= maxCount * 0.5) return "#16a34a"; // green-600
-    return "#4ade80"; // green-400
+    if (count >= maxCount * 0.8) return "#4a6b8a"; // gray-100 for no data
+    if (count >= maxCount * 0.6) return "#6b96c1"; // green-800
+    if (count >= maxCount * 0.4) return "#5aa7db"; // green-600
+    if (count >= maxCount * 0.2) return "#8cc4e8"; // green-400
+    return "#c8e1f5"; // green-400
   };
 
   return (
-    <div className="flex flex-col gap-6 p-6 bg-white rounded-lg shadow-md">
+    <div className="flex flex-col gap-6 p-6 bg-white rounded-3xl h-full">
       <h2 className="text-xl font-semibold text-gray-800">{title}</h2>
 
-      <div className="h-40 relative z-10">
+      <div className="flex-1 relative z-10 min-h-40">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart
             data={chartData}

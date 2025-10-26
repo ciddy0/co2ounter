@@ -44,9 +44,9 @@ const MiniLeaderboard = () => {
   }
 
   return (
-    <div className="flex flex-col p-6 bg-white rounded-lg shadow-md">
-      <h2 className="text-xl font-semibold text-gray-800 border-b pb-2">
-        Leaderboard
+    <div className="flex flex-col p-6 bg-white rounded-3xl h-full">
+      <h2 className="text-xl font-semibold text-gray-800 pb-2">
+        Top AI Demons
       </h2>
 
       <div className="grid grid-cols-4 gap-2 text-sm font-medium text-gray-500 py-2">
@@ -60,27 +60,15 @@ const MiniLeaderboard = () => {
         {displayUsers.map((user) => (
           <div
             key={`${user.rank}-${user.name}`}
-            className={"grid grid-cols-4 gap-2 p-3"}
+            className={`grid grid-cols-4 gap-2 p-3 ${
+              user.isCurrentUser ? "bg-blue-50 rounded-3xl" : ""
+            }`}
           >
-            <div
-              className={`font-semibold ${
-                user.rank <= 3
-                  ? "text-yellow-600"
-                  : user.isCurrentUser
-                  ? "text-blue-600"
-                  : "text-gray-600"
-              }`}
-            >
+            <div className={"font-semibold text-gray-600 "}>
               {user.rank.toString()}
             </div>
 
-            <div
-              className={`font-medium ${
-                user.isCurrentUser ? "text-blue-700" : "text-gray-800"
-              }`}
-            >
-              {user.name}
-            </div>
+            <div className={"font-medium text-gray-800"}>{user.name}</div>
 
             <div className="text-right font-medium text-gray-700">
               {user.promptCount.toLocaleString()}

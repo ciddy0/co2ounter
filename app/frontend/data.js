@@ -1,12 +1,13 @@
 const databaseValues = [
   // October 2025 (recent days)
+  { date: new Date(2025, 9, 26), count: 150 },
   { date: new Date(2025, 9, 24), count: 3 },
-  { date: new Date(2025, 9, 23), count: 2 },
+  { date: new Date(2025, 9, 23), count: 38 },
   { date: new Date(2025, 9, 22), count: 1 },
   { date: new Date(2025, 9, 20), count: 4 },
   { date: new Date(2025, 9, 18), count: 2 },
   { date: new Date(2025, 9, 15), count: 3 },
-  { date: new Date(2025, 9, 12), count: 1 },
+  { date: new Date(2025, 9, 12), count: 89 },
   { date: new Date(2025, 9, 10), count: 2 },
   { date: new Date(2025, 9, 8), count: 4 },
   { date: new Date(2025, 9, 5), count: 1 },
