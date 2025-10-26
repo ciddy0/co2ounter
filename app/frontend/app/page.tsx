@@ -29,14 +29,11 @@ export default function Home() {
             </h2>
             <a
               href="#"
-              className="px-8 py-3 bg-green-600 text-white font-semibold rounded hover:bg-green-700 transition"
+              className="px-8 py-3 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition"
             >
-              Download
+              Install to Google Chrome
             </a>
             <div className="w-full max-w-lg shadow-md rounded-2xl overflow-hidden flex items-center justify-center">
-              {/* <span className="text-gray-500 dark:text-gray-400">
-                Placeholder Image
-              </span> */}
               <Image
                 src="/preview3.png"
                 alt="Preview"
@@ -46,34 +43,6 @@ export default function Home() {
               />
             </div>
           </div>
-          // <div className="flex flex-col md:flex-row items-center justify-center gap-8 md-gap-16 px-4 max-w-5xl mx-auto my-auto">
-          //   {/* Left: Title and Slogan */}
-          //   <div className="flex flex-col items-start text-left space-y-4 md:flex-1">
-          //     <h1 className="text-4xl font-bold text-black dark:text-white">
-          //       co2ounter
-          //     </h1>
-          //     <h2 className="text-xl font-semibold text-[#BC9E9E]">
-          //       Track and reduce your AI carbon impact.
-          //     </h2>
-          //     <a
-          //       href="#"
-          //       className="px-8 py-3 bg-green-600 rounded text-white font-semibold hover:bg-green-700 transition"
-          //     >
-          //       Download
-          //     </a>
-          //   </div>
-
-          //   {/* Right: Image */}
-          //   <div className="w-full md:w-auto md:max-w-md rounded-md overflow-hidden flex items-center justify-center bg-gray-200 dark:bg-gray-800">
-          //     <Image
-          //       src="/preview.png"
-          //       alt="Preview"
-          //       width={400}
-          //       height={800}
-          //       className="w-full h-auto rounded"
-          //     />
-          //   </div>
-          // </div>
         );
       case "team":
         return (
@@ -146,9 +115,6 @@ export default function Home() {
       <header className="flex items-center justify-between p-4">
         <div className="flex items-center gap-2">
           <Image src="/happy.png" alt="Happy Cat" width={55} height={5} />
-          {/* <h1 className="text-xl font-bold text-black dark:text-white">
-            co2ounter
-          </h1> */}
         </div>
         <nav className="flex gap-6">
           <button

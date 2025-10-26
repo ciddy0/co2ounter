@@ -221,7 +221,7 @@ const getYesterdayData = (history: any[]) => {
   const dailyCo2Avg = calculateDailyAverage(data.user.co2Total);
 
   return (
-    <div className="container mx-auto py-12 space-y-8">
+    <div className="container mx-auto py-12 px-10 space-y-8">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
@@ -300,7 +300,7 @@ const getYesterdayData = (history: any[]) => {
 
       {/* Heatmap */}
       <div className="mb-4">
-        <Heatmap data={data.yearHistory}totalPrompts={data.user.promptTotal}  />
+        <Heatmap data={data.yearHistory} totalPrompts={data.user.promptTotal} />
       </div>
     </div>
   );
