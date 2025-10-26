@@ -31,7 +31,9 @@ chrome.storage.sync.get({ firebaseToken: null }, (data) => {
   isLoggedIn = !!firebaseToken;
   console.log("🔑 Loaded Firebase token:", firebaseToken ? "YES" : "NO");
   updatePopup();
-  updateBadgeFromFirebase(); // Load initial badge count
+  if (isLoggedIn) {
+    updateBadgeFromFirebase(); // Load initial badge count
+  }
 });
 
 // Backend sync helper
@@ -87,6 +89,9 @@ async function updateBadgeFromFirebase() {
     chrome.action.setBadgeText({ text: count.toString() });
     chrome.action.setBadgeBackgroundColor({ color: "#4caf50" });
     console.log("🔖 Badge updated:", count);
+  } else {
+    // Clear badge if no stats available
+    chrome.action.setBadgeText({ text: "" });
   }
 }
 
@@ -119,15 +124,29 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   }
 
   if (message.type === "LOGOUT") {
+    console.log("🚪 Logging out user...");
+
+    // Clear state immediately
     firebaseToken = null;
     isLoggedIn = false;
+
+    // Clear badge immediately
+    chrome.action.setBadgeText({ text: "" });
+
+    // Update popup path BEFORE clearing storage
+    chrome.action.setPopup({ popup: "welcome-popup.html" });
+    console.log("🔄 Popup path updated to welcome-popup.html");
+
+    // Then clear storage
     chrome.storage.sync.remove("firebaseToken", () => {
-      console.log("🚪 Logged out, token removed");
-      chrome.action.setBadgeText({ text: "" }); // Clear badge
-      updatePopup();
+      console.log("✅ Token removed from storage");
+      console.log("🎉 Logout complete!");
+
+      // Send success response
       sendResponse({ success: true });
     });
-    return true;
+
+    return true; // async sendResponse
   }
 
   if (message.type === "PROMPT_SENT") {
@@ -200,9 +219,9 @@ function updatePopup() {
   console.log("🔄 Popup updated to:", popupPath);
 }
 
-// Refresh badge periodically (every 5 minutes)
+// Refresh badge periodically (every 5 minutes) - only if logged in
 setInterval(() => {
-  if (isLoggedIn) {
+  if (isLoggedIn && firebaseToken) {
     updateBadgeFromFirebase();
   }
 }, 5 * 60 * 1000);

@@ -63,28 +63,33 @@ document.addEventListener("DOMContentLoaded", async () => {
   function updateUI(data) {
     const { user, today, exceeded } = data;
 
+    console.log("📊 Updating UI with data:", { user, today, exceeded });
+
     // Update username
     if (userNameEl) {
       userNameEl.innerText = user.username || "Anonymous";
     }
 
-    // Update today's stats
+    // Update today's stats (or use lifetime if today is 0)
+    const displayPromptCount = today.promptCount || 0;
+    const displayCo2 = today.co2Total || 0;
+
     if (promptCountEl) {
-      promptCountEl.innerText = (today.promptCount || 0).toLocaleString();
+      promptCountEl.innerText = displayPromptCount.toLocaleString();
     }
 
     if (co2CountEl) {
-      co2CountEl.innerText = (today.co2Total || 0).toFixed(2) + "g";
+      co2CountEl.innerText = displayCo2.toFixed(2) + "g";
     }
 
     // Update prompt message
     if (promptMsgEl) {
-      promptMsgEl.innerText = (today.promptCount || 0).toLocaleString();
+      promptMsgEl.innerText = displayPromptCount.toLocaleString();
     }
 
     // Update message based on prompt count
     if (promptMessageEl) {
-      const count = today.promptCount || 0;
+      const count = displayPromptCount;
       if (count === 0) {
         promptMessageEl.innerText = " today. Let's get started!";
       } else if (count < 10) {
@@ -96,10 +101,13 @@ document.addEventListener("DOMContentLoaded", async () => {
       }
     }
 
+    // Reset colors first
+    if (promptCountEl) promptCountEl.style.color = "";
+    if (co2CountEl) co2CountEl.style.color = "";
+
     // Show visual feedback for exceeded limits
     if (exceeded.prompts || exceeded.co2) {
       console.warn("⚠️ Daily limit exceeded:", exceeded);
-      // You can add visual indicators here
       if (exceeded.prompts && promptCountEl) {
         promptCountEl.style.color = "#ff6b6b";
       }
